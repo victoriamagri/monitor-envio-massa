@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Monitor de Envio em Massa</title>
+<style>
+/* Layout: painel de leitura rápida — faixa de resumo, tendência semanal + etapas lado a lado, tabela de franquias filtrável. Tema claro fixo (padrão Seazone). */
+:root {
+  color-scheme: light;
+  --bg: #EAEEF6;
+  --surface: #FFFFFF;
+  --tint: #F0F2FA;
+  --ink: #080E32;
+  --muted: #6B6E84;
+  --line: #E6E7EA;
+  --blue: #0055FF;
+  --coral: #FC6058;
+  --amber: #E39A1C;
+  --ok: #0F8A4F;
+  --ok-bg: #DDF3E7;
+  --warn: #A15C00;
+  --warn-bg: #FFEFD2;
+  --bad: #C4231B;
+  --bad-bg: #FFE3E1;
+  --font: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --mono: ui-monospace, "SF Mono", Consolas, monospace;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 24px 40px;
+}
+[hidden] { display: none !important; }
+.wrap { max-width: 1180px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 20px; }
+.wrap > * { min-width: 0; }
+.brand { font-size: 11px; letter-spacing: .14em; text-transform: uppercase; color: var(--blue); font-weight: 700; }
+.brand::before { content: "●"; margin-right: 6px; color: var(--coral); }
+header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: flex-end; gap: 12px; }
+h1 { font-size: 26px; margin: 4px 0 2px; text-wrap: balance; letter-spacing: -.01em; }
+.sub { color: var(--muted); margin: 0; }
+.side { display: grid; gap: 8px; justify-items: end; }
+.fresh { font-size: 12px; color: var(--muted); text-align: right; }
+.fresh strong { color: var(--ink); }
+.fresh .stale { color: var(--bad); font-weight: 700; }
+.seg { display: inline-flex; background: var(--surface); border-radius: 999px; padding: 3px; gap: 2px; }
+.seg button { border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 999px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: var(--blue); color: #fff; font-weight: 700; }
+
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.kpi { background: var(--surface); border-radius: 10px; padding: 16px; display: grid; gap: 4px; align-content: start; }
+.kpi .lab { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
+.kpi .num { font-size: 32px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1; }
+.kpi .num small { font-size: 15px; color: var(--muted); font-weight: 400; }
+.kpi .txt { font-size: 12.5px; color: var(--muted); }
+.kpi.hl { background: var(--ink); color: #fff; }
+.kpi.hl .lab, .kpi.hl .txt, .kpi.hl .num small { color: #B9BFE0; }
+.delta { font-size: 12px; font-weight: 700; }
+.delta.up { color: var(--ok); } .delta.down { color: var(--bad); } .delta.eq { color: var(--muted); }
+.kpi.hl .delta.up { color: #7BE3A8; } .kpi.hl .delta.down { color: #FF9C96; } .kpi.hl .delta.eq { color: #B9BFE0; }
+
+.row2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 12px; }
+.panel { background: var(--surface); border-radius: 10px; padding: 18px; min-width: 0; }
+.panel h2 { font-size: 15px; margin: 0 0 2px; }
+.hint { color: var(--muted); font-size: 12.5px; margin: 0 0 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 14px; font-size: 12px; color: var(--muted); margin-top: 8px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
+svg text { font-family: var(--font); }
+
+.stage { display: grid; grid-template-columns: 140px minmax(0, 1fr) 96px; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.stage:last-child { border-bottom: 0; }
+.stage .nm { font-weight: 600; font-size: 13px; }
+.stage .nm small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
+.bar { height: 10px; background: var(--tint); border-radius: 5px; overflow: hidden; position: relative; }
+.bar span { position: absolute; inset: 0 auto 0 0; background: var(--blue); border-radius: 5px; }
+.bar .goal { position: absolute; top: -3px; bottom: -3px; left: 50%; width: 2px; background: var(--ink); opacity: .35; }
+.stage .v { text-align: right; font-variant-numeric: tabular-nums; font-size: 12.5px; }
+.stage .v b { font-size: 14px; }
+
+.tools { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+.chip { border: 1px solid var(--line); background: var(--surface); color: var(--ink); border-radius: 999px; padding: 6px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.chip:focus-visible, .seg button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.chip .c { font-variant-numeric: tabular-nums; opacity: .7; margin-left: 4px; }
+#busca, #ordem { font: inherit; font-size: 13px; padding: 7px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--ink); }
+#busca { flex: 1 1 200px; min-width: 0; }
+
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 880px; }
+th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; padding: 8px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+td { padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+tbody tr:hover td { background: var(--tint); }
+.num-c { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fc { font-family: var(--mono); font-size: 11.5px; color: var(--blue); }
+.nome { display: block; font-weight: 600; }
+.pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
+.pill.usa { background: var(--ok-bg); color: var(--ok); }
+.pill.pouco { background: var(--warn-bg); color: var(--warn); }
+.pill.nao { background: var(--bad-bg); color: var(--bad); }
+.cov { display: grid; grid-template-columns: 44px 80px; gap: 8px; align-items: center; justify-content: end; }
+.cov .bar { height: 7px; }
+.cov .bar span.usa { background: var(--ok); } .cov .bar span.pouco { background: var(--amber); } .cov .bar span.nao { background: var(--coral); }
+.et { text-align: center; font-variant-numeric: tabular-nums; white-space: nowrap; color: var(--muted); }
+.et b { color: var(--ink); }
+.et.zero b { color: var(--bad); }
+.et.na { color: var(--line); }
+.empty { padding: 28px; text-align: center; color: var(--muted); }
+
+details.notes { background: var(--surface); border-radius: 10px; padding: 14px 18px; }
+details.notes summary { cursor: pointer; font-weight: 700; font-size: 14px; }
+details.notes ul { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; display: grid; gap: 6px; max-width: 80ch; }
+details.notes b { color: var(--ink); }
+
+#estado { background: var(--surface); border-radius: 10px; padding: 32px; text-align: center; color: var(--muted); }
+#estado b { color: var(--ink); display: block; font-size: 16px; margin-bottom: 4px; }
+
+@media (max-width: 900px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .row2 { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 460px) {
+  .kpis { grid-template-columns: minmax(0, 1fr); }
+  .stage { grid-template-columns: 110px minmax(0, 1fr) 84px; }
+  .side { justify-items: start; }
+  .fresh { text-align: left; }
+}
+@media (prefers-reduced-motion: no-preference) { .bar span { transition: width .5s ease; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <div class="brand">Seazone · Operação Franquias</div>
+      <h1>Monitor de Envio em Massa</h1>
+      <p class="sub">As franquias estão usando as mensagens em massa do Seazone Host? <span id="janela"></span></p>
+    </div>
+    <div class="side">
+      <div class="seg" role="group" aria-label="Período">
+        <button type="button" id="p-r7" data-p="r7" aria-pressed="true">Últimos 7 dias</button>
+        <button type="button" id="p-tot" data-p="tot" aria-pressed="false">Desde 20/09</button>
+      </div>
+      <div class="fresh" id="fresh">Carregando dados…</div>
+    </div>
+  </header>
+
+  <div id="estado"><b>Carregando o painel</b>Os números chegam do Sapron todo dia às 14h.</div>
+
+  <div id="conteudo" class="wrap" style="padding:0;width:100%" hidden>
+    <section class="kpis" id="kpis"></section>
+
+    <section class="row2">
+      <div class="panel">
+        <h2>Semana a semana desde a liberação</h2>
+        <p class="hint">Quantas franquias ficaram em cada faixa, por semana (domingo a sábado), desde 20/09.</p>
+        <div id="semanas"></div>
+        <div class="legend">
+          <span><i style="background:var(--ok)"></i>Usa (≥ 50%)</span>
+          <span><i style="background:var(--amber)"></i>Usa pouco (10–49%)</span>
+          <span><i style="background:var(--coral)"></i>Tentou (abaixo de 10%)</span>
+          <span><i style="background:var(--tint);outline:1px solid var(--line)"></i>Não mandou nada</span>
+        </div>
+      </div>
+      <div class="panel">
+        <h2>Por etapa da hospedagem</h2>
+        <p class="hint">Em quantas reservas cada mensagem foi enviada, de todas as que já podiam receber. A marca no meio é a régua de 50%.</p>
+        <div id="etapas"></div>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h2>Franquias</h2>
+      <p class="hint" id="hint-tab"></p>
+      <div class="tools">
+        <button class="chip" type="button" id="f-todas" data-f="todas" aria-pressed="true">Todas<span class="c"></span></button>
+        <button class="chip" type="button" id="f-usa" data-f="usa" aria-pressed="false">Usa<span class="c"></span></button>
+        <button class="chip" type="button" id="f-pouco" data-f="pouco" aria-pressed="false">Usa pouco<span class="c"></span></button>
+        <button class="chip" type="button" id="f-nao" data-f="nao" aria-pressed="false">Não usa<span class="c"></span></button>
+        <input id="busca" type="search" placeholder="Buscar franquia ou código" aria-label="Buscar franquia ou código">
+        <select id="ordem" aria-label="Ordenar">
+          <option value="cov">Maior cobertura</option>
+          <option value="covasc">Menor cobertura</option>
+          <option value="eleg">Mais reservas</option>
+          <option value="delta">Maior variação</option>
+        </select>
+      </div>
+      <div class="tbl">
+        <table>
+          <thead>
+            <tr>
+              <th>Franquia</th><th>Situação</th><th class="num-c">Cobertura</th>
+              <th class="num-c" id="th-comp">Semana anterior</th>
+              <th style="text-align:center">2 dias antes</th><th style="text-align:center">Dia do check-in</th>
+              <th style="text-align:center">Meio da estadia</th><th style="text-align:center">Véspera do check-out</th>
+              <th style="text-align:center">Dia do check-out</th>
+            </tr>
+          </thead>
+          <tbody id="linhas"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <details class="notes">
+      <summary>Como os números são calculados</summary>
+      <ul>
+        <li><b>Fonte:</b> reservas do Sapron de imóveis de franquia, sem canceladas e sem bloqueios, desde 20/09/2026, quando o envio em massa foi liberado para as franquias. Atualiza todo dia às 14h.</li>
+        <li><b>Quando cada mensagem conta:</b> as mesmas regras do Seazone Host. "2 dias antes" conta 2 dias antes do check-in; "dia do check-in" no próprio check-in; "meio da estadia" 2 dias depois do check-in, só em estadias de 4 noites ou mais; "véspera do check-out" um dia antes do check-out; "dia do check-out" no próprio dia.</li>
+        <li><b>Só conta o que já podia ter sido enviado:</b> uma reserva entra numa etapa quando o dia dessa mensagem já passou (até ontem).</li>
+        <li><b>Últimos 7 dias:</b> os 7 dias completos até ontem. A comparação é com os 7 dias anteriores.</li>
+        <li><b>Régua:</b> usa = enviou em 50% ou mais das mensagens possíveis; usa pouco = de 10% a 49%; não usa = abaixo de 10%.</li>
+        <li><b>O que o envio mede:</b> o Sapron marca a mensagem como enviada quando alguém clica em enviar no acordeão do Seazone Host. Ele não guarda o dia do clique nem quem clicou.</li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+<script>
+const ETAPAS = [
+  ['d2', '2 dias antes', 'do check-in'], ['cin', 'Dia do check-in', ''], ['mid', 'Meio da estadia', 'estadias de 4+ noites'],
+  ['eve', 'Véspera do check-out', ''], ['cout', 'Dia do check-out', '']
+];
+const ROT = { usa: 'Usa', pouco: 'Usa pouco', nao: 'Não usa' };
+const pct = (s, e) => e ? s / e : 0;
+const statusDe = (e, s) => { const p = pct(s, e); return p >= 0.5 ? 'usa' : p >= 0.1 ? 'pouco' : 'nao'; };
+const fmtP = (x) => (x * 100).toLocaleString('pt-BR', { maximumFractionDigits: x > 0 && x < 0.1 ? 1 : 0 }) + '%';
+const fmtN = (n) => Number(n).toLocaleString('pt-BR');
+const dBR = (iso) => { const [y, m, d] = String(iso).slice(0, 10).split('-'); return `${d}/${m}`; };
+const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const ls = { get(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
+
+let P = null, periodo = ls.get('mem-periodo', 'r7'), filtro = ls.get('mem-filtro', 'todas'), ordem = ls.get('mem-ordem', 'cov'), busca = '';
+
+// Franquias do recorte escolhido: só quem tinha reserva elegível no período
+function lista() {
+  return (P.franquias || []).map(f => {
+    const [e, s] = f.totais[periodo];
+    const ant = periodo === 'r7' && f.totais.p7[0] ? f.totais.p7 : null;
+    return { fc: f.fc, nome: f.nome, eleg: e, env: s, status: statusDe(e, s), ant, etapas: f.etapas[periodo] };
+  }).filter(f => f.eleg > 0);
+}
+
+function deltaHtml(atual, ant, unidade) {
+  if (ant == null) return '';
+  const d = atual - ant;
+  if (Math.abs(d) < 1e-9) return `<span class="delta eq">= 7 dias anteriores</span>`;
+  const txt = unidade === 'pp' ? `${d > 0 ? '+' : ''}${(d * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} p.p.` : `${d > 0 ? '+' : ''}${d}`;
+  return `<span class="delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'} ${txt} vs 7 dias anteriores</span>`;
+}
+
+function render() {
+  const F = lista();
+  const r7 = periodo === 'r7';
+  document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === periodo)));
+  document.getElementById('janela').textContent = r7
+    ? `Últimos 7 dias: ${dBR(P.janela.inicio)} a ${dBR(P.janela.fim)}.`
+    : `Desde a liberação: ${dBR(P.inicio)} a ${dBR(P.janela.fim)}.`;
+  document.getElementById('th-comp').textContent = r7 ? '7 dias anteriores' : 'Última semana';
+  document.getElementById('hint-tab').textContent = r7
+    ? 'Cobertura = mensagens enviadas ÷ mensagens que a franquia podia ter enviado nos últimos 7 dias, somando as 5 etapas.'
+    : 'Cobertura = mensagens enviadas ÷ mensagens que a franquia podia ter enviado desde 20/09, somando as 5 etapas.';
+
+  const nf = F.length, nu = F.filter(f => f.status === 'usa').length, np = F.filter(f => f.status === 'pouco').length;
+  const na = F.filter(f => f.env > 0).length;
+  const E = F.reduce((a, f) => a + f.eleg, 0), S = F.reduce((a, f) => a + f.env, 0);
+  let ant = null;
+  if (r7) {
+    const A = (P.franquias || []).filter(f => f.totais.p7[0] > 0).map(f => f.totais.p7);
+    ant = {
+      usam: A.filter(([e, s]) => statusDe(e, s) === 'usa').length,
+      pouco: A.filter(([e, s]) => statusDe(e, s) === 'pouco').length,
+      algum: A.filter(([e, s]) => s > 0).length,
+      cov: pct(A.reduce((a, x) => a + x[1], 0), A.reduce((a, x) => a + x[0], 0))
+    };
+  }
+  const quando = r7 ? 'nos últimos 7 dias' : 'desde 20/09';
+  document.getElementById('kpis').innerHTML = `
+    <div class="kpi hl"><span class="lab">Usam o envio</span><span class="num">${nu} <small>de ${nf}</small></span>
+      <span class="txt">${nu === 1 ? 'franquia enviou' : 'franquias enviaram'} pelo menos metade das mensagens possíveis ${quando}.</span>${deltaHtml(nu, ant?.usam)}</div>
+    <div class="kpi"><span class="lab">Usam pouco</span><span class="num">${np}</span>
+      <span class="txt">${np === 1 ? 'franquia ficou' : 'franquias ficaram'} entre 10% e 49% das mensagens.</span>${deltaHtml(np, ant?.pouco)}</div>
+    <div class="kpi"><span class="lab">Mandaram alguma</span><span class="num">${na} <small>de ${nf}</small></span>
+      <span class="txt">${nf - na} ${nf - na === 1 ? 'franquia não mandou' : 'franquias não mandaram'} nenhuma mensagem em massa ${quando}.</span>${deltaHtml(na, ant?.algum)}</div>
+    <div class="kpi"><span class="lab">Cobertura geral</span><span class="num">${fmtP(pct(S, E))}</span>
+      <span class="txt">${fmtN(S)} mensagens enviadas de ${fmtN(E)} possíveis, somando todas as franquias.</span>${deltaHtml(pct(S, E), ant?.cov, 'pp')}</div>`;
+
+  renderSemanas(P.semanas || []);
+
+  const tot = {}; ETAPAS.forEach(([k]) => tot[k] = [0, 0]);
+  F.forEach(f => ETAPAS.forEach(([k]) => { tot[k][0] += f.etapas[k][0]; tot[k][1] += f.etapas[k][1]; }));
+  document.getElementById('etapas').innerHTML = ETAPAS.map(([k, n, sub]) => {
+    const [e, s] = tot[k], p = pct(s, e);
+    return `<div class="stage"><span class="nm">${n}${sub ? `<small>${sub}</small>` : ''}</span><div class="bar"><span style="width:${Math.max(p * 100, s ? 0.8 : 0)}%"></span><i class="goal"></i></div>
+      <span class="v"><b>${fmtP(p)}</b><br>${fmtN(s)} de ${fmtN(e)}</span></div>`;
+  }).join('');
+
+  renderTabela();
+}
+
+function renderSemanas(S) {
+  const W = 560, H = 214, padL = 30, padB = 38, padT = 14, padR = 6;
+  const max = Math.max(...S.map(s => s.franquias), 1);
+  const top = Math.ceil(max / 20) * 20;
+  const bw = (W - padL - padR) / Math.max(S.length, 1);
+  const y = v => padT + (H - padT - padB) * (1 - v / top);
+  let g = '';
+  for (let t = 0; t <= top; t += top / 4) {
+    g += `<line x1="${padL}" x2="${W - padR}" y1="${y(t)}" y2="${y(t)}" stroke="#E6E7EA"/><text x="${padL - 6}" y="${y(t) + 4}" font-size="10" text-anchor="end" fill="#6B6E84">${t}</text>`;
+  }
+  const ult = S.length - 1;
+  S.forEach((s, i) => {
+    const w = Math.min(bw * 0.6, 64), x = padL + i * bw + (bw - w) / 2;
+    const tentou = s.algum - s.usam - s.pouco, nada = s.franquias - s.algum;
+    const parts = [[s.usam, '#0F8A4F'], [s.pouco, '#E39A1C'], [tentou, '#FC6058'], [nada, '#F0F2FA']];
+    let acc = 0;
+    parts.forEach(([v, c]) => { if (v > 0) g += `<rect x="${x}" y="${y(acc + v)}" width="${w}" height="${y(acc) - y(acc + v)}" fill="${c}"/>`; acc += v; });
+    g += `<text x="${x + w / 2}" y="${y(s.algum) - 5}" font-size="11" font-weight="700" text-anchor="middle" fill="#080E32">${s.algum || ''}</text>`;
+    g += `<text x="${x + w / 2}" y="${H - padB + 15}" font-size="10" text-anchor="middle" fill="${i === ult ? '#080E32' : '#6B6E84'}" font-weight="${i === ult ? 700 : 400}">${dBR(s.inicio)} a ${dBR(s.fim)}</text>`;
+    const dias = Math.round((new Date(s.fim) - new Date(s.inicio)) / 864e5) + 1;
+    if (dias < 7) g += `<text x="${x + w / 2}" y="${H - padB + 28}" font-size="9.5" text-anchor="middle" fill="#0055FF" font-weight="700">EM ANDAMENTO</text>`;
+  });
+  document.getElementById('semanas').innerHTML =
+    `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Franquias por faixa de uso, semana a semana desde 20/09">${g}</svg>
+     <p class="hint" style="margin:6px 0 0">O número sobre cada barra é quantas franquias mandaram pelo menos uma mensagem naquela semana.</p>`;
+}
+
+function renderTabela() {
+  const F = lista(), r7 = periodo === 'r7';
+  const ultSem = (P.semanas || [])[P.semanas.length - 1];
+  const cont = { todas: F.length, usa: 0, pouco: 0, nao: 0 };
+  F.forEach(f => cont[f.status]++);
+  document.querySelectorAll('.chip').forEach(b => {
+    b.setAttribute('aria-pressed', String(b.dataset.f === filtro));
+    b.querySelector('.c').textContent = cont[b.dataset.f];
+  });
+  document.getElementById('ordem').value = ordem;
+  // no acumulado, a coluna de comparação mostra os últimos 7 dias
+  const comp = f => {
+    if (r7) return f.ant;
+    const o = P.franquias.find(x => x.fc === f.fc);
+    return o && o.totais.r7[0] ? o.totais.r7 : null;
+  };
+  const q = busca.trim().toLowerCase();
+  const L = F.filter(f => (filtro === 'todas' || f.status === filtro) && (!q || (f.nome + ' ' + f.fc).toLowerCase().includes(q)));
+  const c = f => pct(f.env, f.eleg), cc = f => { const a = comp(f); return a ? pct(a[1], a[0]) : 0; };
+  const sorters = {
+    cov: (a, b) => c(b) - c(a) || b.eleg - a.eleg,
+    covasc: (a, b) => c(a) - c(b) || b.eleg - a.eleg,
+    eleg: (a, b) => b.eleg - a.eleg,
+    delta: (a, b) => r7 ? (c(b) - cc(b)) - (c(a) - cc(a)) : (cc(b) - c(b)) - (cc(a) - c(a))
+  };
+  L.sort(sorters[ordem] || sorters.cov);
+  const tb = document.getElementById('linhas');
+  if (!L.length) { tb.innerHTML = `<tr><td colspan="9" class="empty">Nenhuma franquia com esse filtro.</td></tr>`; return; }
+  tb.innerHTML = L.map(f => {
+    const p = c(f), a = comp(f);
+    let antTxt = '<span style="color:var(--muted)">sem reservas</span>';
+    if (a) {
+      const pa = pct(a[1], a[0]), st = statusDe(a[0], a[1]);
+      const novo = r7 ? p : pa, velho = r7 ? pa : p;
+      const seta = novo > velho + 0.005 ? '<span class="delta up">▲</span>' : novo < velho - 0.005 ? '<span class="delta down">▼</span>' : '';
+      antTxt = `${fmtP(pa)} <span class="pill ${st}" style="font-size:10.5px">${ROT[st]}</span> ${seta}`;
+    }
+    const et = ETAPAS.map(([k]) => {
+      const [e, s] = f.etapas[k];
+      if (!e) return `<td class="et na">—</td>`;
+      return `<td class="et${s ? '' : ' zero'}"><b>${s}</b>/${e}</td>`;
+    }).join('');
+    return `<tr>
+      <td><span class="fc">${esc(f.fc)}</span><span class="nome">${esc(f.nome)}</span></td>
+      <td><span class="pill ${f.status}">${ROT[f.status]}</span></td>
+      <td class="num-c"><div class="cov"><b>${fmtP(p)}</b><div class="bar"><span class="${f.status}" style="width:${Math.min(p * 100, 100)}%"></span></div></div></td>
+      <td class="num-c">${antTxt}</td>${et}</tr>`;
+  }).join('');
+}
+
+document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { periodo = b.dataset.p; ls.set('mem-periodo', periodo); if (P) render(); }));
+document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => { filtro = b.dataset.f; ls.set('mem-filtro', filtro); if (P) renderTabela(); }));
+document.getElementById('busca').addEventListener('input', e => { busca = e.target.value; if (P) renderTabela(); });
+document.getElementById('ordem').addEventListener('change', e => { ordem = e.target.value; ls.set('mem-ordem', ordem); if (P) renderTabela(); });
+
+fetch('dados.json?t=' + Date.now(), { cache: 'no-store' })
+  .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
+  .then(dados => {
+    P = dados;
+    const ger = new Date(P.gerado_em);
+    const horas = (Date.now() - ger.getTime()) / 36e5;
+    const q = ger.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+    document.getElementById('fresh').innerHTML = horas > 30
+      ? `<span class="stale">Atualizado em ${q}: está atrasado</span><br>A atualização das 14h não rodou.`
+      : `Atualizado em <strong>${q}</strong> · todo dia às 14h`;
+    document.getElementById('estado').hidden = true;
+    document.getElementById('conteudo').hidden = false;
+    render();
+  })
+  .catch(() => {
+    document.getElementById('estado').innerHTML = '<b>Não foi possível carregar os dados</b>Recarregue a página. Se continuar, avise a Victoria (Operação).';
+    document.getElementById('fresh').textContent = '';
+  });
+</script>
+</body>
+</html>
