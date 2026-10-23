@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Treinamentos da Tela de Avaliações</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<meta name="robots" content="noindex,nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;700;800&family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: relatório de leitura em coluna única — resumo, as duas turmas lado a lado, linha do tempo das mudanças, números do Sapron, reações por tema, pendências. Tema claro fixo (padrão Seazone, decisão dela). */
+:root {
+  color-scheme: light;
+  --bg: #F3F5FA;
+  --surface: #FFFFFF;
+  --tint: #E9EDF7;
+  --ink: #080E32;
+  --muted: #5D6280;
+  --line: #DFE3EE;
+  --blue: #0055FF;
+  --blue-soft: #DCE7FF;
+  --coral: #FC6058;
+  --coral-soft: #FFE4E2;
+  --ok: #0F7A47;
+  --ok-bg: #DDF3E7;
+  --warn: #9A5600;
+  --warn-bg: #FFEFD2;
+  --bad: #B8231B;
+  --bad-bg: #FFE3E1;
+  --display: "Archivo", "Helvetica Neue", Arial, sans-serif;
+  --body: "Source Sans 3", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--ink); font-family: var(--body); font-size: 16px; line-height: 1.55;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 28px 56px;
+}
+.wrap { max-width: 1040px; margin: 0 auto; display: grid; grid-template-columns: minmax(0, 1fr); gap: 28px; }
+.wrap > * { min-width: 0; }
+h1, h2, h3 { font-family: var(--display); text-wrap: balance; margin: 0; letter-spacing: -.01em; }
+h1 { font-size: clamp(28px, 4.4vw, 40px); font-weight: 800; line-height: 1.08; }
+h2 { font-size: 22px; font-weight: 800; }
+h3 { font-size: 16px; font-weight: 700; }
+p { margin: 0; }
+.eyebrow { font-family: var(--mono); font-size: 12px; letter-spacing: .1em; text-transform: uppercase; color: var(--blue); }
+.muted { color: var(--muted); }
+.small { font-size: 14px; }
+section { display: grid; gap: 14px; }
+.sec-head { display: grid; gap: 4px; }
+.sec-head p { color: var(--muted); max-width: 72ch; }
+
+/* cabeçalho */
+.top { display: grid; gap: 12px; }
+.top .meta { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 14px; color: var(--muted); }
+.top .meta b { color: var(--ink); font-weight: 600; }
+.resumo { background: var(--ink); color: #fff; border-radius: 12px; padding: 22px 24px; display: grid; gap: 12px; }
+.resumo h2 { color: #fff; font-size: 18px; }
+.resumo ul { margin: 0; padding-left: 20px; display: grid; gap: 8px; max-width: 80ch; }
+.resumo li::marker { color: var(--coral); }
+.resumo b { color: #fff; }
+.resumo li { color: #D4D8EE; }
+
+/* turmas */
+.turmas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.turma { background: var(--surface); border-radius: 12px; padding: 18px 20px; display: grid; gap: 10px; align-content: start; }
+.turma .tag { justify-self: start; font-family: var(--mono); font-size: 12px; padding: 3px 10px; border-radius: 999px; background: var(--blue-soft); color: var(--blue); }
+.turma dl { margin: 0; display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 6px 12px; font-size: 14.5px; }
+.turma dt { color: var(--muted); }
+.turma dd { margin: 0; }
+.apresentado { background: var(--surface); border-radius: 12px; padding: 18px 20px; display: grid; gap: 12px; }
+.apresentado ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; max-width: 85ch; }
+.nums { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; }
+.num { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 2px; align-content: start; }
+.num b { font-family: var(--display); font-size: 26px; font-weight: 800; font-variant-numeric: tabular-nums; line-height: 1.15; }
+.num span { font-size: 13.5px; color: var(--muted); }
+.aviso { font-size: 14px; background: var(--warn-bg); color: var(--warn); border-radius: 8px; padding: 10px 12px; }
+.aviso b { color: var(--warn); }
+
+/* linha do tempo das mudanças */
+.tl { background: var(--surface); border-radius: 12px; padding: 6px 20px; }
+.tl-item { display: grid; grid-template-columns: 150px minmax(0, 1fr) 150px; gap: 14px; align-items: start; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.tl-item:last-child { border-bottom: 0; }
+.tl-item .q { font-family: var(--mono); font-size: 12.5px; color: var(--muted); padding-top: 2px; }
+.tl-item h3 { margin-bottom: 2px; }
+.tl-item p { font-size: 14.5px; color: var(--muted); }
+.pill { display: inline-block; padding: 3px 10px; border-radius: 999px; font-size: 12.5px; font-weight: 700; white-space: nowrap; justify-self: start; }
+.pill.ok { background: var(--ok-bg); color: var(--ok); }
+.pill.warn { background: var(--warn-bg); color: var(--warn); }
+.pill.bad { background: var(--bad-bg); color: var(--bad); }
+.pill.info { background: var(--tint); color: var(--muted); }
+
+/* números */
+.panel { background: var(--surface); border-radius: 12px; padding: 18px 20px; display: grid; gap: 12px; min-width: 0; align-content: start; }
+.chart { overflow-x: auto; }
+.chart svg { display: block; min-width: 640px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--muted); }
+.legend i { display: inline-block; width: 11px; height: 11px; border-radius: 2px; margin-right: 6px; vertical-align: -1px; }
+.row2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+.tbl { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; padding: 8px; border-bottom: 2px solid var(--line); white-space: nowrap; }
+td { padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+.r { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.fc { font-family: var(--mono); font-size: 12px; color: var(--blue); display: block; }
+.up { color: var(--ok); font-weight: 700; } .down { color: var(--bad); font-weight: 700; }
+
+/* reações */
+.temas { display: grid; gap: 12px; }
+.tema { background: var(--surface); border-radius: 12px; padding: 18px 20px; display: grid; grid-template-columns: minmax(0, 1fr) 190px; gap: 8px 20px; }
+.tema .corpo { display: grid; gap: 8px; min-width: 0; }
+.tema .quem { font-size: 13.5px; color: var(--muted); }
+.tema blockquote { margin: 0; padding-left: 12px; border-left: 3px solid var(--coral); font-style: italic; color: var(--ink); font-size: 15px; }
+.tema .lado { display: grid; gap: 6px; align-content: start; justify-items: start; font-size: 13.5px; color: var(--muted); }
+.positivo { background: var(--ok-bg); border-radius: 12px; padding: 16px 20px; display: grid; gap: 8px; }
+.positivo h3 { color: var(--ok); }
+.positivo ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; }
+.fora { background: var(--surface); border-radius: 12px; padding: 16px 20px; display: grid; gap: 8px; }
+.fora ul { margin: 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); font-size: 14.5px; }
+
+details { background: var(--surface); border-radius: 12px; padding: 14px 20px; }
+summary { cursor: pointer; font-family: var(--display); font-weight: 700; }
+summary:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+details ul { margin: 10px 0 0; padding-left: 20px; display: grid; gap: 6px; color: var(--muted); font-size: 14.5px; max-width: 85ch; }
+
+@media (max-width: 820px) {
+  .turmas, .row2 { grid-template-columns: minmax(0, 1fr); }
+  .nums { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .tl-item { grid-template-columns: minmax(0, 1fr); gap: 6px; }
+  .tema { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 420px) {
+  .nums { grid-template-columns: minmax(0, 1fr); }
+  .turma dl { grid-template-columns: minmax(0, 1fr); }
+}
+.voltar { justify-self: start; font-size: 14px; font-weight: 600; color: var(--blue); text-decoration: none; }
+.voltar:hover { text-decoration: underline; }
+.voltar:focus-visible { outline: 2px solid var(--blue); outline-offset: 3px; }
+</style>
+
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <a class="voltar" href="./">← Voltar ao monitor</a>
+    <span class="eyebrow">Seazone Host · Operação Franquias · relatório</span>
+    <h1>Treinamentos da Tela de Avaliações</h1>
+    <p class="muted" style="max-width:75ch">O que foi apresentado nos dois quinzenais sobre a tela de pedidos de avaliação, o que mudou na tela por causa deles e como as franquias reagiram, nas falas e no uso registrado no Sapron.</p>
+    <div class="meta">
+      <span><b>Turma A</b> · 20/10, 9h</span>
+      <span><b>Turma B</b> · 21/10, 17h</span>
+      <span><b>Dados do Sapron</b> · 23/10, 15h30</span>
+    </div>
+  </header>
+
+  <section class="resumo" aria-label="Resumo">
+    <h2>Em resumo</h2>
+    <ul>
+      <li><b>Nos dois dias de treinamento o uso da tela bateu recorde.</b> Foram 228 pedidos em 20/10 e 147 em 21/10, enviados por 20 e 22 franquias. Antes disso, nenhum dia tinha passado de 10 franquias.</li>
+      <li><b>22 franquias usaram a tela em 20 ou 21/10 sem ter usado na semana anterior</b>, e 6 delas usaram pela primeira vez.</li>
+      <li><b>O pico não se manteve.</b> Em 22 e 23/10 foram 80 pedidos, de 11 franquias. Ainda é cedo, porque o hábito pedido é diário e a cobrança no score só começa em novembro.</li>
+      <li><b>Seis mudanças pedidas pelas franquias já estão em produção.</b> A principal: o pedido feito pelo card de check-out passou a aparecer na tela, e vice-versa, o que tirou a principal objeção ("vou ter que pedir duas vezes").</li>
+      <li><b>Continuam em aberto:</b> o telefone do hóspede que volta ao número antigo, a avaliação que demora a sair da lista de pendentes e o excesso de mensagens, porque a IA da Seazone também pede avaliação ao hóspede.</li>
+    </ul>
+  </section>
+
+  <!-- 1. Os treinamentos -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">1 · Os treinamentos</span>
+      <h2>Duas turmas, mesmo conteúdo</h2>
+      <p>O quinzenal ia tratar de manutenção. A pedido da diretoria, o tema mudou para a tela de avaliações, por causa da alta temporada. A manutenção foi para a sala diária com o Vinícius.</p>
+    </div>
+    <div class="turmas">
+      <div class="turma">
+        <span class="tag">Turma A</span>
+        <h3>Segunda, 20/10, das 9h às 10h20</h3>
+        <dl>
+          <dt>Presença</dt><dd>73 nomes na lista (inclui a equipe da Seazone)</dd>
+          <dt>Condução</dt><dd>Rose (Anfitriões Seazone)</dd>
+          <dt>Convidadas</dt><dd>Victória (Backoffice, comentários e contestações) e Renata (Tecnologia, responsável pela tela)</dd>
+          <dt>Mais falaram</dt><dd>Fábio Moreira Campos, John Erik Gasparello, Luila, Glauce Ramser, Camila Moura Lacerda, Ana Lúcia Gasparello</dd>
+        </dl>
+      </div>
+      <div class="turma">
+        <span class="tag">Turma B</span>
+        <h3>Terça, 21/10, das 17h às 18h</h3>
+        <dl>
+          <dt>Presença</dt><dd>76 nomes na lista (inclui a equipe da Seazone)</dd>
+          <dt>Condução</dt><dd>Rose, com Victória e Renata. Larissa respondeu sobre a tela de contato com o hóspede</dd>
+          <dt>Diferença</dt><dd>Abriu com a Renata contando o que já tinha mudado depois da Turma A</dd>
+          <dt>Mais falaram</dt><dd>Luís Eduardo Machado, Helena (Edilson e Helena, Porto Alegre), Roberta Turra, Érica Bianca, Jaciane Melo, Andrea Podlasinski</dd>
+        </dl>
+      </div>
+    </div>
+
+    <div class="apresentado">
+      <h3>O que foi apresentado</h3>
+      <ul>
+        <li><b>A tela:</b> fica em Menu lateral › Operação do dia › Avaliações (ícone de estrela). Lista quem fez check-out e ainda não avaliou, com filtro por dia e por plataforma, contador de selecionados e o botão que abre o WhatsApp Web com a mensagem pronta.</li>
+        <li><b>A rotina pedida:</b> todo dia, no computador, abrir a tela no dia de 5 dias atrás e pedir a avaliação a quem ainda aparece como pendente. O pedido no check-out é o primeiro; o da tela é o reforço.</li>
+        <li><b>O que muda em novembro:</b> o uso da tela (ou do botão de feedback do card de check-out) passa a contar no score da franquia.</li>
+        <li><b>O cuidado com "selecionar todos":</b> a caixa geral marcava também quem já tinha recebido o pedido.</li>
+        <li><b>O pedido de uso:</b> usar a tela e abrir suporte com print quando algo der errado. Comentar no grupo de franquias não chega à Tecnologia.</li>
+      </ul>
+      <div class="nums">
+        <div class="num"><b>4,80 → 4,774</b><span>nota média no Airbnb de agosto para outubro (outubro parcial)</span></div>
+        <div class="num"><b>4 de 10</b><span>estadias viram avaliação. Em setembro foram mais de 6.000 avaliações para cerca de 16.000 check-outs (42%)</span></div>
+        <div class="num"><b>5% a 9%</b><span>índice de uso da tela citado na apresentação (veja a observação abaixo)</span></div>
+        <div class="num"><b>+33%</b><span>de check-outs em relação ao mesmo período do ano passado (Turma B)</span></div>
+      </div>
+      <p class="aviso"><b>Observação:</b> o mesmo número "5% a 9%" foi apresentado como "dos check-outs de cada semana" na Turma A e como "das franquias" na Turma B. Pelo Sapron, a primeira leitura é a certa: de 9% a 13% dos check-outs semanais tiveram pedido registrado (seção 3).</p>
+    </div>
+  </section>
+
+  <!-- 2. Mudanças -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">2 · O que mudou na tela</span>
+      <h2>Do pedido na reunião à produção</h2>
+      <p>Pedidos feitos na Turma A, ajustados pela Renata no mesmo dia e confirmados na Turma B. O status segue a atualização "Em produção" que a Renata mandou depois.</p>
+    </div>
+    <div class="tl">
+      <div class="tl-item">
+        <span class="q">Fábio, Luila, Adriano</span>
+        <div><h3>Card de check-out e tela de avaliações conversam</h3><p>Quem pede pelo botão de feedback do card aparece como "solicitado" na tela, e vice-versa. Qualquer um dos dois conta para o score. A Renata confirmou ao vivo na Turma B que já estava funcionando.</p></div>
+        <span class="pill ok">Em produção</span>
+      </div>
+      <div class="tl-item">
+        <span class="q">Fábio</span>
+        <div><h3>A tela abre em 5 dias atrás</h3><p>Antes abria no dia de hoje, quando ainda não é hora de pedir. Agora o filtro padrão é a data de 5 dias atrás, e dá para voltar mais dias pela setinha.</p></div>
+        <span class="pill ok">Em produção</span>
+      </div>
+      <div class="tl-item">
+        <span class="q">Ana Lúcia, John</span>
+        <div><h3>Sem caixa de seleção para quem já foi solicitado</h3><p>Evita o pedido em dobro quando se usa "selecionar todos".</p></div>
+        <span class="pill ok">Em produção</span>
+      </div>
+      <div class="tl-item">
+        <span class="q">Tecnologia</span>
+        <div><h3>Coluna "Solicitado em"</h3><p>Mostra a data e a hora do pedido. É a base para o reenvio depois de alguns dias, que ainda não foi feito.</p></div>
+        <span class="pill ok">Em produção</span>
+      </div>
+      <div class="tl-item">
+        <span class="q">Camila Moura Lacerda</span>
+        <div><h3>Co-anfitrião usando a tela</h3><p>Verificado: o acesso está liberado para todos e o pedido feito pelo co-anfitrião fica registrado normalmente.</p></div>
+        <span class="pill ok">Verificado</span>
+      </div>
+      <div class="tl-item">
+        <span class="q">John, Glauce, Helena, Luís</span>
+        <div><h3>Telefone do hóspede vindo do pré check-in</h3><p>A tela pegava o número da Stays. Em 20/10 a Renata passou a usar o número do pré check-in. O número editado à mão ainda pode voltar ao antigo quando a reserva sincroniza de novo com a Stays; quando a Central edita, o número fica. A Renata está investigando.</p></div>
+        <span class="pill warn">Parcial</span>
+      </div>
+      <div class="tl-item">
+        <span class="q">Luila, Fábio, John</span>
+        <div><h3>Avaliação feita que continua como "pendente"</h3><p>A tela atualiza uma vez por dia, e o Airbnb leva cerca de 6 dias para liberar o comentário. Mesmo assim há casos de mais de 20 dias. Depende de a Nekt atualizar com mais frequência (alinhamento com a Nanda). Saiu da lista de "em produção".</p></div>
+        <span class="pill bad">Em aberto</span>
+      </div>
+      <div class="tl-item">
+        <span class="q">Tecnologia</span>
+        <div><h3>Reservas canceladas ou inexistentes na lista</h3><p>Corrigido na semana anterior aos treinamentos, depois de um suporte da equipe. A tela mostra só reservas concluídas, filtrando pela data de check-out.</p></div>
+        <span class="pill ok">Corrigido antes</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. Números -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">3 · O que os números mostram</span>
+      <h2>Uso da tela antes e depois dos treinamentos</h2>
+      <p>Cada barra é um dia. O Sapron grava o dia e a hora em que alguém clica em "Solicitar feedback". Os dias dos treinamentos estão em coral.</p>
+    </div>
+
+    <div class="nums">
+      <div class="num"><b>375</b><span>pedidos nos dois dias de treinamento, mais que em qualquer semana inteira antes de 13/10</span></div>
+      <div class="num"><b>38</b><span>franquias pediram avaliação em 20 ou 21/10. Na semana anterior foram 37 em sete dias</span></div>
+      <div class="num"><b>22</b><span>delas não tinham usado a tela na semana anterior. 6 usaram pela primeira vez</span></div>
+      <div class="num"><b>11</b><span>franquias usaram em 22 e 23/10 (até 15h30). O pico foi nos dias do treinamento</span></div>
+    </div>
+
+    <div class="panel">
+      <h3>Pedidos de avaliação por dia</h3>
+      <div class="chart" id="g-pedidos"></div>
+      <h3>Franquias que pediram no dia</h3>
+      <div class="chart" id="g-franquias"></div>
+      <div class="legend">
+        <span><i style="background:var(--blue)"></i>dia comum</span>
+        <span><i style="background:var(--coral)"></i>dia de treinamento</span>
+        <span><i style="background:var(--blue-soft)"></i>23/10, parcial até 15h30</span>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="panel">
+        <h3>Check-outs que receberam pedido</h3>
+        <p class="small muted">Por semana de check-out. O pedido costuma sair 5 dias depois do check-out, então as semanas mais recentes ainda vão subir.</p>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>Check-outs de</th><th class="r">Check-outs</th><th class="r">Com pedido</th><th class="r">%</th></tr></thead>
+            <tbody id="t-semanas"></tbody>
+          </table>
+        </div>
+      </div>
+      <div class="panel">
+        <h3>Quem mais pediu depois de 20/10</h3>
+        <p class="small muted">Pedidos feitos de 20/10 em diante, comparados com tudo o que a franquia pediu antes.</p>
+        <div class="tbl">
+          <table>
+            <thead><tr><th>Franquia</th><th class="r">Antes</th><th class="r">Desde 20/10</th></tr></thead>
+            <tbody id="t-top"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel">
+      <h3>Três pontos que pedem atenção</h3>
+      <ul style="margin:0;padding-left:20px;display:grid;gap:8px;max-width:85ch">
+        <li><b>Camila Bresolin (ITA-002-CBD)</b> é a segunda que mais usou a tela (388 pedidos, citada no top 3 pela Renata) e não pediu nada desde 19/10.</li>
+        <li><b>Fábio Moreira Campos (FLN-001-CEN)</b> tem cerca de 300 check-outs por mês e só 1 pedido registrado. Ele pede pelo card de check-out e por áudio. Com o espelhamento, os próximos pedidos dele pelo card devem passar a aparecer.</li>
+        <li><b>As mensagens em massa caíram na mesma semana.</b> Pelo Monitor de Envio em Massa, foram 77 envios de 16 a 22/10, contra 220 nos 7 dias anteriores. Os treinamentos trataram só do pedido de avaliação, não das 5 mensagens da estadia.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 4. Reações -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">4 · Como as franquias reagiram</span>
+      <h2>O que elas disseram, por tema</h2>
+      <p>Agrupado pelo assunto, com quem levantou e o que foi respondido. As falas estão resumidas da transcrição.</p>
+    </div>
+    <div class="temas">
+      <div class="tema">
+        <div class="corpo">
+          <h3>"Já peço no check-out. Vou ter que pedir duas vezes?"</h3>
+          <p>Foi a objeção mais repetida. Muitas franquias já pedem pelo card de check-out e viram a tela como trabalho a mais. Andrea Podlasinski disse ter 65% de avaliações pedindo no check-out e pediu que essa opção continue. Jaciane Melo sugeriu o contrário: tirar o pedido do card, já que o melhor momento é depois.</p>
+          <blockquote>"Eu vou ter que fazer isso dobrado, né?" (Fábio, Turma A)</blockquote>
+          <span class="quem">Fábio Moreira Campos, Luís Eduardo Machado, Adriano Vidal, Andrea Podlasinski, Jaciane Melo</span>
+        </div>
+        <div class="lado"><span class="pill ok">Resolvido</span>As duas vias agora se espelham e qualquer uma conta. A Victória concorda em revisar a mensagem do card (o pedido no próprio dia do check-out rende menos).</div>
+      </div>
+
+      <div class="tema">
+        <div class="corpo">
+          <h3>Telefone errado que volta depois de editado</h3>
+          <p>Números inexistentes ou de outra pessoa. A franquia corrige e, um dia depois, o número antigo volta, também no card de check-out. A Helena disse que perdeu o controle de quem já tinha recebido e que, para ela, "a ferramenta não está funcionando". O Luís disse que o problema tinha sido resolvido no Sapron e voltou com o Host.</p>
+          <blockquote>"Eu edito, passou 24 horas, ele volta pro número anterior e aí eu não consigo mandar." (Helena, Turma B)</blockquote>
+          <span class="quem">John Erik Gasparello, Glauce Ramser, Helena (Porto Alegre), Luís Eduardo Machado</span>
+        </div>
+        <div class="lado"><span class="pill warn">Parcial</span>A tela passou a usar o pré check-in. A edição que se perde na sincronização com a Stays está em investigação.</div>
+      </div>
+
+      <div class="tema">
+        <div class="corpo">
+          <h3>Hóspede que já avaliou e continua como pendente</h3>
+          <p>Gera cobrança em dobro e hóspede irritado. A Luila tem casos de mais de 20 dias. O Fábio diz ficar uma semana sem nenhuma atualização, nem na tela nem no ScorePulse.</p>
+          <blockquote>"Já é a segunda mensagem que eu respondo. Eu já fiz a avaliação." (hóspede citado pela Ana Lúcia, Turma A)</blockquote>
+          <span class="quem">Luila, Fábio Moreira Campos, Ana Lúcia Gasparello, John Erik Gasparello</span>
+        </div>
+        <div class="lado"><span class="pill bad">Em aberto</span>Depende da frequência de atualização da Nekt. Orientação até lá: pedir só 5 dias depois do check-out.</div>
+      </div>
+
+      <div class="tema">
+        <div class="corpo">
+          <h3>Mensagem demais para o hóspede</h3>
+          <p>O hóspede recebe o pedido da franquia no check-out, o da IA da Seazone alguns dias depois e o reforço da tela. A esposa do André Demétrio perguntou o que a franquia faz que a IA não faz. A resposta da Renata foi o contato pessoal, pelo número de quem atendeu. As sugestões foram: a IA não mandar para quem a franquia já pediu (Érica), mandar só um lembrete depois de 10 a 13 dias com "se já avaliou, obrigado" (Roberta) e tirar a reserva da lista da franquia antes de a IA entrar (Luís). A Roberta também achou a mensagem atual com cara de propaganda.</p>
+          <blockquote>"Pelo amor de Deus, para de mandar isso aí, porque eu já recebi umas 500 vezes." (hóspede citado pela Helena, Turma B)</blockquote>
+          <span class="quem">Helena, Roberta Turra, Érica Bianca, André Demétrio (esposa), Luís Eduardo Machado</span>
+        </div>
+        <div class="lado"><span class="pill info">Em avaliação</span>A retirada do pedido da IA está em estudo. A Renata vai perguntar à NewByte se a IA consegue consultar quem já recebeu o pedido.</div>
+      </div>
+
+      <div class="tema">
+        <div class="corpo">
+          <h3>Em que dia pedir</h3>
+          <p>O Fábio apontou que a tela abria no dia de hoje, quando a tarefa é dos check-outs de 5 dias atrás, e pediu uma lista acumulada de quem não avaliou nos últimos 15 dias. A Helena pede depois de cerca de 10 dias e diz ter mais resposta assim. A orientação da Victória foi pedir no dia seguinte ao check-out e de novo depois de 5 dias (Turma A), sempre depois de garantir que não ficou problema com o hóspede. O pedido no próprio dia da saída é o que menos rende.</p>
+          <span class="quem">Fábio Moreira Campos, Helena, Adriano Vidal, Victória</span>
+        </div>
+        <div class="lado"><span class="pill ok">Parte feita</span>Padrão de 5 dias em produção. A lista acumulada e o reenvio ainda não foram feitos.</div>
+      </div>
+
+      <div class="tema">
+        <div class="corpo">
+          <h3>"Onde o hóspede avalia na Booking, Expedia e Decolar?"</h3>
+          <p>Fora do Airbnb, o hóspede quer avaliar e não acha onde. A Glauce pediu um texto pronto, para copiar e colar, com o passo a passo de cada plataforma.</p>
+          <span class="quem">Glauce Ramser</span>
+        </div>
+        <div class="lado"><span class="pill warn">Combinado</span>A Victória vai mandar um comunicado com o caminho por plataforma, e a Renata pode colocar o texto nos modelos da tela.</div>
+      </div>
+
+      <div class="tema">
+        <div class="corpo">
+          <h3>Booking sem o telefone do hóspede</h3>
+          <p>O hóspede chega ao imóvel sem a franquia saber e reclama da espera. O Rodrigo disse que nem pede avaliação a esses hóspedes, porque sabe que a nota vai ser ruim.</p>
+          <span class="quem">Rodrigo (conta de Fernanda Kieling Kist)</span>
+        </div>
+        <div class="lado"><span class="pill info">Outro time</span>Corte feito pela Booking, sem aviso. O paliativo é a tela de contato com o hóspede, do time de Hóspedes.</div>
+      </div>
+    </div>
+
+    <div class="positivo">
+      <h3>O que foi bem recebido</h3>
+      <ul>
+        <li>A mudança feita entre as turmas: a Rose abriu a Turma B mostrando os ajustes, e a Renata confirmou o espelhamento ao vivo ("olha aí as coisas boas acontecendo ao vivo").</li>
+        <li>A Gisélia acrescentou à mensagem dela "aqui não é a IA, é o anfitrião que te atendeu" e disse que os hóspedes estão respondendo melhor.</li>
+        <li>O Luís elogiou a tela de contato com o hóspede ("uma mão na roda"). A Rose contou que os suportes pedindo telefone da Booking caíram desde que ela foi lançada.</li>
+        <li>A Luila pediu um relatório de avaliações por imóvel para mandar ao proprietário. O Fábio mostrou que ele já existe no ScorePulse. Falta só exportar em PDF.</li>
+      </ul>
+    </div>
+
+    <div class="fora">
+      <h3>Assuntos que surgiram fora do tema da tela</h3>
+      <ul>
+        <li>Conta do percentual de avaliações no ScorePulse (56% contra 61,7% na conta do Fábio) e avaliação contestada que ainda aparece lá: encaminhado ao David.</li>
+        <li>Avaliação ruim de antes de uma migração de imóvel contando para a nova franquia (Sandra): a ocorrência não será aplicada. O score fica com o David, via suporte.</li>
+        <li>Contestações que foram para "excluídos" (John) e uma nota 1 com ameaça gravada em vídeo (Luila, MSU1102). O Airbnb não aceita vídeo como prova, então vale enviar a transcrição.</li>
+        <li>Prazo para mudar a avaliação que a Seazone deixa para o hóspede: até 4 dias, porque no 5º ela sai automaticamente.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 5. Pendências -->
+  <section>
+    <div class="sec-head">
+      <span class="eyebrow">5 · Pendências</span>
+      <h2>O que ficou combinado e ainda não foi entregue</h2>
+    </div>
+    <div class="panel">
+      <div class="tbl">
+        <table>
+          <thead><tr><th>O quê</th><th>Quem</th><th>Situação</th></tr></thead>
+          <tbody>
+            <tr><td>Avaliação feita sair da lista de pendentes mais rápido (sincronização da Nekt)</td><td>Renata, com a Nanda</td><td><span class="pill bad">Em aberto</span></td></tr>
+            <tr><td>Telefone editado que volta ao antigo quando a reserva sincroniza com a Stays</td><td>Renata</td><td><span class="pill warn">Investigando</span></td></tr>
+            <tr><td>Reenviar o pedido a quem não avaliou depois de alguns dias</td><td>Renata</td><td><span class="pill info">Não iniciado</span></td></tr>
+            <tr><td>A IA não pedir avaliação a quem a franquia já pediu, ou deixar de pedir</td><td>Renata (NewByte) e Victória</td><td><span class="pill info">Em avaliação</span></td></tr>
+            <tr><td>Comunicado de como avaliar na Booking, Expedia e Decolar, e texto nos modelos da tela</td><td>Victória e Renata</td><td><span class="pill warn">A enviar</span></td></tr>
+            <tr><td>Revisar a mensagem de pedido do card de check-out (menos propaganda, momento melhor)</td><td>Victória</td><td><span class="pill info">Em estudo</span></td></tr>
+            <tr><td>Exportar as avaliações do imóvel em PDF no ScorePulse</td><td>David (via Victória e Rayanne)</td><td><span class="pill info">Sugestão</span></td></tr>
+            <tr><td>Avaliação contestada e aceita que continua no ScorePulse, e a conta do percentual</td><td>David</td><td><span class="pill warn">Encaminhado</span></td></tr>
+            <tr><td>Link de avaliação do site que não chegou para uma reserva da Sandra</td><td>Victória</td><td><span class="pill warn">A verificar</span></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <details>
+    <summary>Fontes e como os números foram contados</summary>
+    <ul>
+      <li><b>Transcrições:</b> "Quinzenal Turma A — Tela de Avaliações" (20/10) e "Quinzenal Turma B — Tela de Avaliações" (21/10), geradas pelo Meet. A transcrição automática tem erros de nomes e palavras. As falas aqui foram resumidas e conferidas no contexto.</li>
+      <li><b>Mudanças na tela:</b> mensagem da Renata depois da Turma A e a atualização "Em produção" que veio em seguida.</li>
+      <li><b>Pedidos:</b> Sapron, campo que guarda a hora do clique em "Solicitar feedback" em cada reserva de imóvel de franquia (sem canceladas e sem bloqueios). Consulta de 23/10 às 15h30.</li>
+      <li><b>Limites do dado:</b> cada reserva guarda só um pedido, então um segundo pedido para o mesmo hóspede não aparece. Até 21/10 o pedido feito pelo card de check-out não entrava nesse campo; depois do espelhamento passou a entrar, então parte do uso depois disso pode vir do card.</li>
+      <li><b>Franquias:</b> por código de franquia. O nome é o do titular no Sapron.</li>
+    </ul>
+  </details>
+</div>
+
+<script>
+// [dia, pedidos, franquias que pediram, check-outs do dia, check-outs com pedido]
+const DIAS = [["2026-09-15",31,7,397,44],["2026-09-16",51,9,364,17],["2026-09-17",75,9,397,21],["2026-09-18",18,8,470,46],["2026-09-19",10,3,471,30],["2026-09-20",22,4,888,89],["2026-09-21",115,6,637,70],["2026-09-22",37,6,363,30],["2026-09-23",109,3,319,29],["2026-09-24",13,4,306,36],["2026-09-25",18,5,480,36],["2026-09-26",32,5,515,39],["2026-09-27",25,3,1025,91],["2026-09-28",26,5,717,70],["2026-09-29",51,7,379,41],["2026-09-30",89,6,368,33],["2026-10-01",58,7,265,24],["2026-10-02",11,2,394,26],["2026-10-03",18,2,388,38],["2026-10-04",9,3,571,59],["2026-10-05",62,6,380,38],["2026-10-06",25,5,254,32],["2026-10-07",102,6,268,38],["2026-10-08",71,5,305,45],["2026-10-09",9,4,508,56],["2026-10-10",28,4,445,61],["2026-10-11",13,6,617,87],["2026-10-12",50,7,1607,198],["2026-10-13",12,5,682,141],["2026-10-14",220,10,370,94],["2026-10-15",156,8,397,67],["2026-10-16",35,6,480,63],["2026-10-17",66,6,480,58],["2026-10-18",42,5,1030,105],["2026-10-19",129,10,808,27],["2026-10-20",228,20,450,16],["2026-10-21",147,22,377,15],["2026-10-22",34,8,404,1],["2026-10-23",46,3,493,2]];
+const TREINO = new Set(["2026-10-20", "2026-10-21"]);
+const PARCIAL = "2026-10-23";
+const TOP = [["ITP-001-JPM","Katia Leite do Nascimento",354,81],["CWB-001-CEN","Ana Lúcia Gasparello Cruz",48,79],["ITP-003-CEN","Rael Michaelsen",150,41],["FLN-003-CAM","André Demétrio",63,32],["UBA-002-CEN","Kathellyne Soares de Moraes",15,30],["CMC-001-GRJ","Ana Márcia Pereira Buzzacchino",60,22],["POA-002-CEH","Christina Elisabeth Carpes",107,15],["REC-002-BOV","Débora Renata Gomes Soares",17,13],["GYN-002-SAG","Agatha de Assis Souza Gloria",9,13],["PEN-003-CEN","Thiago Rodrigues Pinto",13,12],["ITA-002-CBD","Camila Bresolin Pereira",388,0]];
+
+const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const dBR = s => s.slice(8, 10) + "/" + s.slice(5, 7);
+const fmt = n => n.toLocaleString("pt-BR");
+
+function barras(id, idx, passo, rotulo) {
+  const W = 980, H = 190, L = 34, R = 8, T = 18, B = 34;
+  const max = Math.max(...DIAS.map(d => d[idx]));
+  const top = Math.ceil(max / passo) * passo;
+  const bw = (W - L - R) / DIAS.length;
+  const y = v => T + (H - T - B) * (1 - v / top);
+  let g = "";
+  for (let t = 0; t <= top; t += passo) {
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(t)}" y2="${y(t)}" stroke="${css("--line")}"/>`;
+    g += `<text x="${L - 6}" y="${y(t) + 4}" font-size="11" text-anchor="end" fill="${css("--muted")}">${t}</text>`;
+  }
+  DIAS.forEach((d, i) => {
+    const v = d[idx], x = L + i * bw + bw * 0.15, w = bw * 0.7;
+    const cor = TREINO.has(d[0]) ? css("--coral") : d[0] === PARCIAL ? css("--blue-soft") : css("--blue");
+    g += `<rect x="${x.toFixed(1)}" y="${y(v).toFixed(1)}" width="${w.toFixed(1)}" height="${(y(0) - y(v)).toFixed(1)}" rx="2" fill="${cor}"><title>${dBR(d[0])}: ${v} ${rotulo}</title></rect>`;
+    if (TREINO.has(d[0]) || v === max) g += `<text x="${(x + w / 2).toFixed(1)}" y="${(y(v) - 5).toFixed(1)}" font-size="11" font-weight="700" text-anchor="middle" fill="${css("--ink")}">${v}</text>`;
+    const dia = new Date(d[0] + "T12:00:00").getDay();
+    if (dia === 1) g += `<text x="${(x + w / 2).toFixed(1)}" y="${H - B + 16}" font-size="10.5" text-anchor="middle" fill="${TREINO.has(d[0]) ? css("--coral") : css("--muted")}" font-weight="${TREINO.has(d[0]) ? 700 : 400}">${dBR(d[0])}</text>`;
+  });
+  document.getElementById(id).innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="${rotulo} por dia de 15/09 a 23/10">${g}</svg>`;
+}
+barras("g-pedidos", 1, 50, "pedidos");
+barras("g-franquias", 2, 5, "franquias");
+
+const semanas = [["15/09 a 21/09", "2026-09-15", "2026-09-21"], ["22/09 a 28/09", "2026-09-22", "2026-09-28"], ["29/09 a 05/10", "2026-09-29", "2026-10-05"], ["06/10 a 12/10", "2026-10-06", "2026-10-12"], ["13/10 a 19/10", "2026-10-13", "2026-10-19"]];
+document.getElementById("t-semanas").innerHTML = semanas.map(([n, a, b]) => {
+  const D = DIAS.filter(d => d[0] >= a && d[0] <= b);
+  const c = D.reduce((s, d) => s + d[3], 0), p = D.reduce((s, d) => s + d[4], 0);
+  return `<tr><td>${n}</td><td class="r">${fmt(c)}</td><td class="r">${fmt(p)}</td><td class="r"><b>${(p / c * 100).toLocaleString("pt-BR", { maximumFractionDigits: 1 })}%</b></td></tr>`;
+}).join("") + `<tr><td colspan="4" class="muted small">Check-outs de 20/10 em diante ficaram de fora: o pedido deles ainda está dentro do prazo de 5 dias.</td></tr>`;
+
+document.getElementById("t-top").innerHTML = TOP.map(([fc, nome, a, d]) =>
+  `<tr><td><span class="fc">${fc}</span>${nome}</td><td class="r">${fmt(a)}</td><td class="r ${d ? "up" : "down"}">${fmt(d)}</td></tr>`
+).join("");
+</script>
+
+</body>
+</html>
