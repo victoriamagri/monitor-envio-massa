@@ -71,7 +71,7 @@ h1 { font-size: 26px; margin: 4px 0 2px; text-wrap: balance; letter-spacing: -.0
 .legend i { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 5px; vertical-align: -1px; }
 svg text { font-family: var(--font); }
 
-.stage { display: grid; grid-template-columns: 140px minmax(0, 1fr) 96px; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); }
+.stage { display: grid; grid-template-columns: 140px minmax(0, 1fr) 112px; gap: 10px; align-items: center; padding: 7px 0; border-bottom: 1px solid var(--line); }
 .stage:last-child { border-bottom: 0; }
 .stage .nm { font-weight: 600; font-size: 13px; }
 .stage .nm small { display: block; font-weight: 400; color: var(--muted); font-size: 11.5px; }
@@ -90,13 +90,15 @@ svg text { font-family: var(--font); }
 #busca { flex: 1 1 200px; min-width: 0; }
 
 .tbl { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 880px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 1080px; }
+table.wk { min-width: 860px; }
 th { text-align: left; font-size: 10.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 700; padding: 8px; border-bottom: 2px solid var(--line); white-space: nowrap; }
 td { padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: middle; }
 tbody tr:hover td { background: var(--tint); }
 .num-c { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
 .fc { font-family: var(--mono); font-size: 11.5px; color: var(--blue); }
 .nome { display: block; font-weight: 600; }
+#linhas td:first-child { min-width: 190px; }
 .pill { display: inline-block; padding: 2px 9px; border-radius: 999px; font-size: 11.5px; font-weight: 700; white-space: nowrap; }
 .pill.usa { background: var(--ok-bg); color: var(--ok); }
 .pill.pouco { background: var(--warn-bg); color: var(--warn); }
@@ -110,6 +112,30 @@ tbody tr:hover td { background: var(--tint); }
 .et.na { color: var(--line); }
 .empty { padding: 28px; text-align: center; color: var(--muted); }
 
+.resumo { background: var(--surface); border-radius: 10px; padding: 16px 18px; border-left: 4px solid var(--blue); font-size: 14.5px; }
+.resumo.queda { border-left-color: var(--coral); } .resumo.alta { border-left-color: var(--ok); }
+.resumo p { margin: 0; max-width: 95ch; } .resumo p + p { margin-top: 6px; color: var(--muted); font-size: 13px; }
+.mov { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 4px; }
+.mov .box, .top2 .box { border: 1px solid var(--line); border-radius: 8px; padding: 12px; min-width: 0; }
+.mov .box h3 { margin: 0 0 2px; font-size: 13px; display: flex; justify-content: space-between; gap: 8px; }
+.mov .box h3 b { font-size: 20px; font-variant-numeric: tabular-nums; }
+.mov .box.up h3 b { color: var(--ok); } .mov .box.down h3 b { color: var(--bad); }
+.mov .box p { margin: 0 0 8px; font-size: 12px; color: var(--muted); }
+.mov ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 12.5px; }
+.mov li { display: grid; gap: 1px; min-width: 0; }
+.mov li .n { font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mov li .d { color: var(--muted); font-variant-numeric: tabular-nums; }
+.vazio { color: var(--muted); font-size: 12.5px; font-style: italic; }
+.top2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+.top2 h3 { margin: 0 0 8px; font-size: 13px; }
+.top2 .tbl table { min-width: 420px; }
+.wk td, .wk th { padding: 7px 8px; }
+.wk tr.and td { color: var(--muted); font-style: italic; }
+.var { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; font-size: 12px; }
+.var.up { color: var(--ok); } .var.down { color: var(--bad); } .var.eq { color: var(--muted); font-weight: 400; }
+.stage .v .var, .stage .v .antes { display: block; }
+.stage .v .antes { color: var(--muted); font-size: 11px; }
+.spark { display: block; }
 details.notes { background: var(--surface); border-radius: 10px; padding: 14px 18px; }
 details.notes summary { cursor: pointer; font-weight: 700; font-size: 14px; }
 details.notes ul { margin: 10px 0 0; padding-left: 18px; color: var(--muted); font-size: 13px; display: grid; gap: 6px; max-width: 80ch; }
@@ -119,11 +145,12 @@ details.notes b { color: var(--ink); }
 #estado b { color: var(--ink); display: block; font-size: 16px; margin-bottom: 4px; }
 
 @media (max-width: 900px) {
-  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .kpis, .mov { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .top2 { grid-template-columns: minmax(0, 1fr); }
   .row2 { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 460px) {
-  .kpis { grid-template-columns: minmax(0, 1fr); }
+  .kpis, .mov { grid-template-columns: minmax(0, 1fr); }
   .stage { grid-template-columns: 110px minmax(0, 1fr) 84px; }
   .side { justify-items: start; }
   .fresh { text-align: left; }
@@ -151,7 +178,21 @@ details.notes b { color: var(--ink); }
   <div id="estado"><b>Carregando o painel</b>Os números chegam do Sapron todo dia às 14h.</div>
 
   <div id="conteudo" class="wrap" style="padding:0;width:100%" hidden>
+    <section class="resumo" id="resumo"></section>
     <section class="kpis" id="kpis"></section>
+
+    <section class="panel">
+      <h2>O que mudou: últimos 7 dias × 7 dias anteriores</h2>
+      <p class="hint" id="hint-mov"></p>
+      <div class="mov" id="mov"></div>
+      <div class="top2" id="top2"></div>
+    </section>
+
+    <section class="panel">
+      <h2>Variação semana a semana</h2>
+      <p class="hint">Cada semana (domingo a sábado) comparada com a anterior. A última semana ainda está em andamento e tem menos mensagens possíveis: compare pela cobertura (%), não pelo total.</p>
+      <div class="tbl"><table class="wk" id="wk"></table></div>
+    </section>
 
     <section class="row2">
       <div class="panel">
@@ -180,12 +221,15 @@ details.notes b { color: var(--ink); }
         <button class="chip" type="button" id="f-usa" data-f="usa" aria-pressed="false">Usa<span class="c"></span></button>
         <button class="chip" type="button" id="f-pouco" data-f="pouco" aria-pressed="false">Usa pouco<span class="c"></span></button>
         <button class="chip" type="button" id="f-nao" data-f="nao" aria-pressed="false">Não usa<span class="c"></span></button>
+        <button class="chip" type="button" id="f-subiu" data-f="subiu" aria-pressed="false">▲ Subiu<span class="c"></span></button>
+        <button class="chip" type="button" id="f-caiu" data-f="caiu" aria-pressed="false">▼ Caiu<span class="c"></span></button>
         <input id="busca" type="search" placeholder="Buscar franquia ou código" aria-label="Buscar franquia ou código">
         <select id="ordem" aria-label="Ordenar">
           <option value="cov">Maior cobertura</option>
           <option value="covasc">Menor cobertura</option>
           <option value="eleg">Mais reservas</option>
-          <option value="delta">Maior variação</option>
+          <option value="delta">Maior alta</option>
+          <option value="queda">Maior queda</option>
         </select>
       </div>
       <div class="tbl">
@@ -194,6 +238,7 @@ details.notes b { color: var(--ink); }
             <tr>
               <th>Franquia</th><th>Situação</th><th class="num-c">Cobertura</th>
               <th class="num-c" id="th-comp">Semana anterior</th>
+              <th class="num-c">Variação</th><th>Semana a semana</th>
               <th style="text-align:center">2 dias antes</th><th style="text-align:center">Dia do check-in</th>
               <th style="text-align:center">Meio da estadia</th><th style="text-align:center">Véspera do check-out</th>
               <th style="text-align:center">Dia do check-out</th>
@@ -211,6 +256,8 @@ details.notes b { color: var(--ink); }
         <li><b>Quando cada mensagem conta:</b> as mesmas regras do Seazone Host. "2 dias antes" conta 2 dias antes do check-in; "dia do check-in" no próprio check-in; "meio da estadia" 2 dias depois do check-in, só em estadias de 4 noites ou mais; "véspera do check-out" um dia antes do check-out; "dia do check-out" no próprio dia.</li>
         <li><b>Só conta o que já podia ter sido enviado:</b> uma reserva entra numa etapa quando o dia dessa mensagem já passou (até ontem).</li>
         <li><b>Últimos 7 dias:</b> os 7 dias completos até ontem. A comparação é com os 7 dias anteriores.</li>
+        <li><b>Variação:</b> diferença de cobertura em pontos percentuais (p.p.). Ex.: de 4% para 1% = −3 p.p. "Subiu" e "Caiu" comparam os últimos 7 dias com os 7 dias anteriores (diferença acima de 0,5 p.p.).</li>
+        <li><b>Janela móvel:</b> uma franquia pode "cair" só porque os envios de dias atrás saíram da janela de 7 dias. A coluna "Semana a semana" mostra a série inteira desde 20/09 para conferir (passe o mouse para ver os valores).</li>
         <li><b>Régua:</b> usa = enviou em 50% ou mais das mensagens possíveis; usa pouco = de 10% a 49%; não usa = abaixo de 10%.</li>
         <li><b>O que o envio mede:</b> o Sapron marca a mensagem como enviada quando alguém clica em enviar no acordeão do Seazone Host. Ele não guarda o dia do clique nem quem clicou.</li>
       </ul>
@@ -230,6 +277,24 @@ const fmtP = (x) => (x * 100).toLocaleString('pt-BR', { maximumFractionDigits: x
 const fmtN = (n) => Number(n).toLocaleString('pt-BR');
 const dBR = (iso) => { const [y, m, d] = String(iso).slice(0, 10).split('-'); return `${d}/${m}`; };
 const esc = (s) => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const RANK = { nao: 0, pouco: 1, usa: 2 };
+const ppTxt = (d) => `${d > 0 ? '+' : d < 0 ? '−' : ''}${Math.abs(d * 100).toLocaleString('pt-BR', { maximumFractionDigits: 1 })} p.p.`;
+const numVar = (d) => `${d > 0 ? '+' : '−'}${fmtN(Math.abs(d))}`;
+const varHtml = (d, fmt) => Math.abs(d) < 1e-9 ? '<span class="var eq">sem mudança</span>'
+  : `<span class="var ${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'} ${fmt(d)}</span>`;
+// movimento de cada franquia: últimos 7 dias × 7 dias anteriores (não depende do período escolhido)
+function movimento(f) {
+  if (!f) return null;
+  const [ea, sa] = f.totais.p7, [eb, sb] = f.totais.r7;
+  if (!ea || !eb) return null;
+  const pa = pct(sa, ea), pb = pct(sb, eb), sta = statusDe(ea, sa), stb = statusDe(eb, sb);
+  let tipo = 'igual';
+  if (sa > 0 && sb === 0) tipo = 'parou';
+  else if (sa === 0 && sb > 0) tipo = 'comecou';
+  else if (RANK[stb] > RANK[sta]) tipo = 'subiu';
+  else if (RANK[stb] < RANK[sta]) tipo = 'caiu';
+  return { fc: f.fc, nome: f.nome, pa, pb, sa, sb, tipo, d: pb - pa, dn: sb - sa };
+}
 const ls = { get(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 
 let P = null, periodo = ls.get('mem-periodo', 'r7'), filtro = ls.get('mem-filtro', 'todas'), ordem = ls.get('mem-ordem', 'cov'), busca = '';
@@ -287,17 +352,103 @@ function render() {
     <div class="kpi"><span class="lab">Cobertura geral</span><span class="num">${fmtP(pct(S, E))}</span>
       <span class="txt">${fmtN(S)} mensagens enviadas de ${fmtN(E)} possíveis, somando todas as franquias.</span>${deltaHtml(pct(S, E), ant?.cov, 'pp')}</div>`;
 
+  renderResumo();
+  renderMov();
   renderSemanas(P.semanas || []);
+  renderVarSemanas(P.semanas || []);
 
-  const tot = {}; ETAPAS.forEach(([k]) => tot[k] = [0, 0]);
+  const tot = {}, totA = {}; ETAPAS.forEach(([k]) => { tot[k] = [0, 0]; totA[k] = [0, 0]; });
   F.forEach(f => ETAPAS.forEach(([k]) => { tot[k][0] += f.etapas[k][0]; tot[k][1] += f.etapas[k][1]; }));
+  const temAnt = r7 && (P.franquias || []).some(f => f.etapas.p7);
+  if (temAnt) (P.franquias || []).forEach(f => ETAPAS.forEach(([k]) => { const x = f.etapas.p7?.[k] || [0, 0]; totA[k][0] += x[0]; totA[k][1] += x[1]; }));
   document.getElementById('etapas').innerHTML = ETAPAS.map(([k, n, sub]) => {
     const [e, s] = tot[k], p = pct(s, e);
+    let cmp = '';
+    if (temAnt) {
+      const pa = pct(totA[k][1], totA[k][0]);
+      cmp = `${varHtml(p - pa, ppTxt)}<span class="antes">antes ${fmtP(pa)} · ${fmtN(totA[k][1])} env.</span>`;
+    }
     return `<div class="stage"><span class="nm">${n}${sub ? `<small>${sub}</small>` : ''}</span><div class="bar"><span style="width:${Math.max(p * 100, s ? 0.8 : 0)}%"></span><i class="goal"></i></div>
-      <span class="v"><b>${fmtP(p)}</b><br>${fmtN(s)} de ${fmtN(e)}</span></div>`;
+      <span class="v"><b>${fmtP(p)}</b><br>${fmtN(s)} de ${fmtN(e)}${cmp}</span></div>`;
   }).join('');
 
   renderTabela();
+}
+
+function renderResumo() {
+  const F = P.franquias || [];
+  const sum = (k, i) => F.reduce((a, f) => a + f.totais[k][i], 0);
+  const Eb = sum('r7', 0), Sb = sum('r7', 1), Ea = sum('p7', 0), Sa = sum('p7', 1);
+  const pb = pct(Sb, Eb), pa = pct(Sa, Ea), d = pb - pa, dn = Sb - Sa;
+  const M = F.map(movimento).filter(Boolean);
+  const c = t => M.filter(m => m.tipo === t).length;
+  const el = document.getElementById('resumo');
+  el.className = 'resumo ' + (d < -0.0005 ? 'queda' : d > 0.0005 ? 'alta' : '');
+  const verbo = d < -0.0005 ? 'caiu' : d > 0.0005 ? 'subiu' : 'ficou estável';
+  const rel = Sa && dn ? ` (${dn > 0 ? '+' : '−'}${Math.abs(Math.round(dn / Sa * 100))}%)` : '';
+  const nada = M.filter(m => m.sa === 0 && m.sb === 0).length;
+  el.innerHTML = `<p><b>O uso ${verbo}.</b> De ${dBR(P.janela.inicio)} a ${dBR(P.janela.fim)} as franquias enviaram <b>${fmtN(Sb)}</b> mensagens em massa, ${dn === 0 ? 'o mesmo número' : `<b>${fmtN(Math.abs(dn))} ${dn < 0 ? 'a menos' : 'a mais'}</b>`} que nos 7 dias anteriores${rel}. A cobertura geral foi de ${fmtP(pa)} para <b>${fmtP(pb)}</b> (${ppTxt(d)}).</p>
+    <p>${c('subiu')} ${c('subiu') === 1 ? 'franquia subiu' : 'franquias subiram'} de faixa, ${c('caiu')} ${c('caiu') === 1 ? 'caiu' : 'caíram'}, ${c('comecou')} ${c('comecou') === 1 ? 'começou' : 'começaram'} a mandar e ${c('parou')} ${c('parou') === 1 ? 'parou' : 'pararam'} de mandar. ${nada} ${nada === 1 ? 'segue' : 'seguem'} sem mandar nenhuma mensagem nos dois períodos.</p>`;
+}
+
+function renderMov() {
+  const M = (P.franquias || []).map(movimento).filter(Boolean);
+  document.getElementById('hint-mov').textContent = `Últimos 7 dias (${dBR(P.janela.inicio)} a ${dBR(P.janela.fim)}) comparados com os 7 dias antes deles. Só entram franquias com reservas nos dois períodos.`;
+  const li = m => `<li><span class="n" title="${esc(m.fc + ' · ' + m.nome)}">${esc(m.nome)}</span><span class="d">${fmtP(m.pa)} → <b>${fmtP(m.pb)}</b> · ${m.sa} → ${m.sb} enviadas</span></li>`;
+  const box = (tipo, titulo, sub, cls, ord) => {
+    const L = M.filter(m => m.tipo === tipo).sort(ord);
+    return `<div class="box ${cls}"><h3>${titulo}<b>${L.length}</b></h3><p>${sub}</p>
+      ${L.length ? `<ul>${L.slice(0, 8).map(li).join('')}${L.length > 8 ? `<li class="d">+ ${L.length - 8} outras na tabela abaixo</li>` : ''}</ul>` : '<span class="vazio">Nenhuma.</span>'}</div>`;
+  };
+  document.getElementById('mov').innerHTML =
+    box('subiu', 'Subiram de faixa', 'Ex.: de "usa pouco" para "usa".', 'up', (a, b) => b.d - a.d) +
+    box('comecou', 'Começaram a mandar', 'Não tinham mandado nenhuma antes.', 'up', (a, b) => b.sb - a.sb) +
+    box('caiu', 'Caíram de faixa', 'Ex.: de "usa" para "usa pouco".', 'down', (a, b) => a.d - b.d) +
+    box('parou', 'Pararam de mandar', 'Mandavam e zeraram nos últimos 7 dias.', 'down', (a, b) => b.sa - a.sa);
+  const top = (titulo, L) => `<div class="box"><h3>${titulo}</h3>
+      ${L.length ? `<div class="tbl"><table class="wk"><thead><tr><th>Franquia</th><th class="num-c">Enviadas</th><th class="num-c">Cobertura</th></tr></thead><tbody>${L.map(m => `<tr><td><span class="fc">${esc(m.fc)}</span><span class="nome">${esc(m.nome)}</span></td><td class="num-c">${m.sa} → <b>${m.sb}</b><br>${varHtml(m.dn, numVar)}</td><td class="num-c">${fmtP(m.pa)} → <b>${fmtP(m.pb)}</b><br>${varHtml(m.d, ppTxt)}</td></tr>`).join('')}</tbody></table></div>` : '<span class="vazio">Nenhuma franquia.</span>'}</div>`;
+  const altas = M.filter(m => m.dn > 0).sort((a, b) => b.dn - a.dn).slice(0, 6);
+  const quedas = M.filter(m => m.dn < 0).sort((a, b) => a.dn - b.dn).slice(0, 6);
+  document.getElementById('top2').innerHTML = top('Maiores altas em mensagens enviadas', altas) + top('Maiores quedas em mensagens enviadas', quedas);
+}
+
+function renderVarSemanas(S) {
+  const traco = '<span class="var eq">—</span>';
+  const linhas = S.map((s, i) => {
+    const a = S[i - 1], p = pct(s.env, s.eleg);
+    const dias = Math.round((new Date(s.fim) - new Date(s.inicio)) / 864e5) + 1;
+    const etp = ETAPAS.map(([k]) => {
+      const x = s.etapas?.[k], y = a?.etapas?.[k];
+      if (!x || !x[0]) return '<td class="et na">—</td>';
+      const px = pct(x[1], x[0]), py = y && y[0] ? pct(y[1], y[0]) : null;
+      const seta = py == null ? '' : px > py + 0.0005 ? ' <span class="delta up">▲</span>' : px < py - 0.0005 ? ' <span class="delta down">▼</span>' : '';
+      return `<td class="et"><b>${fmtP(px)}</b>${seta}</td>`;
+    }).join('');
+    return `<tr class="${dias < 7 ? 'and' : ''}"><td style="white-space:nowrap">${dBR(s.inicio)} a ${dBR(s.fim)}${dias < 7 ? ' · em andamento' : ''}</td>
+      <td class="num-c"><b>${fmtP(p)}</b></td><td class="num-c">${a ? varHtml(p - pct(a.env, a.eleg), ppTxt) : traco}</td>
+      <td class="num-c">${fmtN(s.env)} <span style="color:var(--muted)">de ${fmtN(s.eleg)}</span></td>
+      <td class="num-c">${s.algum} ${a ? varHtml(s.algum - a.algum, numVar) : traco}</td>
+      <td class="num-c">${s.usam} ${a ? varHtml(s.usam - a.usam, numVar) : traco}</td>${etp}</tr>`;
+  }).join('');
+  document.getElementById('wk').innerHTML = `<thead><tr><th>Semana</th><th class="num-c">Cobertura</th><th class="num-c">Variação</th><th class="num-c">Enviadas</th>
+    <th class="num-c">Mandaram alguma</th><th class="num-c">Usam (≥ 50%)</th>${ETAPAS.map(([, n]) => `<th style="text-align:center">${n}</th>`).join('')}</tr></thead><tbody>${linhas}</tbody>`;
+}
+
+// mini tendência da cobertura semanal da franquia desde 20/09
+function spark(f) {
+  const n = (P.semanas || []).length, o = (P.franquias || []).find(x => x.fc === f.fc);
+  const v = Array(n).fill(null);
+  (o?.serie || []).forEach(([w, e, s]) => { if (w < n && e) v[w] = pct(s, e); });
+  const W = 96, H = 26, max = Math.max(0.1, ...v.filter(x => x != null));
+  const X = i => 3 + i * (W - 6) / Math.max(n - 1, 1), Y = x => H - 3 - (H - 6) * x / max;
+  const pts = v.map((x, i) => x == null ? null : [X(i), Y(x)]);
+  let d = '', ab = false;
+  pts.forEach(p => { if (!p) { ab = false; return; } d += `${ab ? 'L' : 'M'}${p[0].toFixed(1)},${p[1].toFixed(1)}`; ab = true; });
+  const cor = v[n - 1] != null && v[n - 2] != null ? (v[n - 1] > v[n - 2] + 0.005 ? '#0F8A4F' : v[n - 1] < v[n - 2] - 0.005 ? '#C4231B' : '#6B6E84') : '#6B6E84';
+  const tit = v.map((x, i) => `${dBR(P.semanas[i].inicio)}: ${x == null ? 'sem reservas' : fmtP(x)}`).join(' · ');
+  return `<svg class="spark" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" role="img" aria-label="${tit}"><title>${tit}</title>
+    <line x1="0" x2="${W}" y1="${H - 3}" y2="${H - 3}" stroke="#E6E7EA"/>
+    <path d="${d}" fill="none" stroke="#0055FF" stroke-width="1.6"/>${pts.map((p, i) => p ? `<circle cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${i === n - 1 ? 2.8 : 1.6}" fill="${i === n - 1 ? cor : '#0055FF'}"/>` : '').join('')}</svg>`;
 }
 
 function renderSemanas(S) {
@@ -330,8 +481,9 @@ function renderSemanas(S) {
 function renderTabela() {
   const F = lista(), r7 = periodo === 'r7';
   const ultSem = (P.semanas || [])[P.semanas.length - 1];
-  const cont = { todas: F.length, usa: 0, pouco: 0, nao: 0 };
-  F.forEach(f => cont[f.status]++);
+  const cont = { todas: F.length, usa: 0, pouco: 0, nao: 0, subiu: 0, caiu: 0 };
+  const dir = f => { const m = movimento(P.franquias.find(x => x.fc === f.fc)); return !m ? '' : m.d > 0.005 ? 'subiu' : m.d < -0.005 ? 'caiu' : ''; };
+  F.forEach(f => { cont[f.status]++; const d = dir(f); if (d) cont[d]++; });
   document.querySelectorAll('.chip').forEach(b => {
     b.setAttribute('aria-pressed', String(b.dataset.f === filtro));
     b.querySelector('.c').textContent = cont[b.dataset.f];
@@ -344,25 +496,27 @@ function renderTabela() {
     return o && o.totais.r7[0] ? o.totais.r7 : null;
   };
   const q = busca.trim().toLowerCase();
-  const L = F.filter(f => (filtro === 'todas' || f.status === filtro) && (!q || (f.nome + ' ' + f.fc).toLowerCase().includes(q)));
+  const L = F.filter(f => (filtro === 'todas' || f.status === filtro || dir(f) === filtro) && (!q || (f.nome + ' ' + f.fc).toLowerCase().includes(q)));
   const c = f => pct(f.env, f.eleg), cc = f => { const a = comp(f); return a ? pct(a[1], a[0]) : 0; };
   const sorters = {
     cov: (a, b) => c(b) - c(a) || b.eleg - a.eleg,
     covasc: (a, b) => c(a) - c(b) || b.eleg - a.eleg,
     eleg: (a, b) => b.eleg - a.eleg,
-    delta: (a, b) => r7 ? (c(b) - cc(b)) - (c(a) - cc(a)) : (cc(b) - c(b)) - (cc(a) - c(a))
+    delta: (a, b) => r7 ? (c(b) - cc(b)) - (c(a) - cc(a)) : (cc(b) - c(b)) - (cc(a) - c(a)),
+    queda: (a, b) => r7 ? (c(a) - cc(a)) - (c(b) - cc(b)) : (cc(a) - c(a)) - (cc(b) - c(b))
   };
   L.sort(sorters[ordem] || sorters.cov);
   const tb = document.getElementById('linhas');
-  if (!L.length) { tb.innerHTML = `<tr><td colspan="9" class="empty">Nenhuma franquia com esse filtro.</td></tr>`; return; }
+  if (!L.length) { tb.innerHTML = `<tr><td colspan="11" class="empty">Nenhuma franquia com esse filtro.</td></tr>`; return; }
   tb.innerHTML = L.map(f => {
     const p = c(f), a = comp(f);
-    let antTxt = '<span style="color:var(--muted)">sem reservas</span>';
+    let antTxt = '<span style="color:var(--muted)">sem reservas</span>', varTxt = '<span class="var eq">—</span>';
     if (a) {
       const pa = pct(a[1], a[0]), st = statusDe(a[0], a[1]);
       const novo = r7 ? p : pa, velho = r7 ? pa : p;
       const seta = novo > velho + 0.005 ? '<span class="delta up">▲</span>' : novo < velho - 0.005 ? '<span class="delta down">▼</span>' : '';
       antTxt = `${fmtP(pa)} <span class="pill ${st}" style="font-size:10.5px">${ROT[st]}</span> ${seta}`;
+      varTxt = varHtml(novo - velho, ppTxt);
     }
     const et = ETAPAS.map(([k]) => {
       const [e, s] = f.etapas[k];
@@ -373,7 +527,7 @@ function renderTabela() {
       <td><span class="fc">${esc(f.fc)}</span><span class="nome">${esc(f.nome)}</span></td>
       <td><span class="pill ${f.status}">${ROT[f.status]}</span></td>
       <td class="num-c"><div class="cov"><b>${fmtP(p)}</b><div class="bar"><span class="${f.status}" style="width:${Math.min(p * 100, 100)}%"></span></div></div></td>
-      <td class="num-c">${antTxt}</td>${et}</tr>`;
+      <td class="num-c">${antTxt}</td><td class="num-c">${varTxt}</td><td>${spark(f)}</td>${et}</tr>`;
   }).join('');
 }
 
