@@ -51,6 +51,12 @@ h1 { font-size: 26px; margin: 4px 0 2px; text-wrap: balance; letter-spacing: -.0
 .seg button { border: 0; background: transparent; color: var(--ink); font: inherit; font-size: 13px; padding: 6px 14px; border-radius: 999px; cursor: pointer; }
 .seg button[aria-pressed="true"] { background: var(--blue); color: #fff; font-weight: 700; }
 
+.abas { display: flex; flex-wrap: wrap; gap: 6px; border-bottom: 2px solid var(--line); }
+.abas button { border: 0; background: transparent; color: var(--muted); font: inherit; font-size: 14.5px; font-weight: 700; padding: 10px 14px; cursor: pointer; border-bottom: 3px solid transparent; margin-bottom: -2px; }
+.abas button[aria-selected="true"] { color: var(--ink); border-bottom-color: var(--blue); }
+.abas button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+.oque { margin: 0; background: var(--surface); border-radius: 10px; padding: 12px 16px; font-size: 13.5px; color: var(--muted); }
+.oque b { color: var(--ink); }
 .kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
 .kpi { background: var(--surface); border-radius: 10px; padding: 16px; display: grid; gap: 4px; align-content: start; }
 .kpi .lab { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); font-weight: 700; }
@@ -164,7 +170,7 @@ details.notes b { color: var(--ink); }
     <div>
       <div class="brand">Seazone · Operação Franquias</div>
       <h1>Monitor de Envio em Massa</h1>
-      <p class="sub">As franquias estão usando as mensagens em massa do Seazone Host? <span id="janela"></span></p>
+      <p class="sub"><span id="pergunta">As franquias estão usando as mensagens em massa do Seazone Host?</span> <span id="janela"></span></p>
     </div>
     <div class="side">
       <div class="seg" role="group" aria-label="Período">
@@ -174,6 +180,12 @@ details.notes b { color: var(--ink); }
       <div class="fresh" id="fresh">Carregando dados…</div>
     </div>
   </header>
+
+  <div class="abas" role="tablist" aria-label="Seção do monitor">
+    <button type="button" role="tab" id="m-massa" data-m="massa" aria-selected="true">Mensagens da estadia</button>
+    <button type="button" role="tab" id="m-av" data-m="av" aria-selected="false">Pedidos de avaliação</button>
+  </div>
+  <p class="oque" id="oque"></p>
 
   <div id="estado"><b>Carregando o painel</b>Os números chegam do Sapron todo dia às 14h.</div>
 
@@ -190,7 +202,7 @@ details.notes b { color: var(--ink); }
 
     <section class="panel">
       <h2>Variação semana a semana</h2>
-      <p class="hint">Cada semana (domingo a sábado) comparada com a anterior. A última semana ainda está em andamento e tem menos mensagens possíveis: compare pela cobertura (%), não pelo total.</p>
+      <p class="hint" id="hint-wk"></p>
       <div class="tbl"><table class="wk" id="wk"></table></div>
     </section>
 
@@ -207,8 +219,8 @@ details.notes b { color: var(--ink); }
         </div>
       </div>
       <div class="panel">
-        <h2>Por etapa da hospedagem</h2>
-        <p class="hint">Em quantas reservas cada mensagem foi enviada, de todas as que já podiam receber. A marca no meio é a régua de 50%.</p>
+        <h2 id="h-etapas">Por etapa da hospedagem</h2>
+        <p class="hint" id="hint-etapas"></p>
         <div id="etapas"></div>
       </div>
     </section>
@@ -235,13 +247,10 @@ details.notes b { color: var(--ink); }
       <div class="tbl">
         <table>
           <thead>
-            <tr>
+            <tr id="th-row">
               <th>Franquia</th><th>Situação</th><th class="num-c">Cobertura</th>
               <th class="num-c" id="th-comp">Semana anterior</th>
               <th class="num-c">Variação</th><th>Semana a semana</th>
-              <th style="text-align:center">2 dias antes</th><th style="text-align:center">Dia do check-in</th>
-              <th style="text-align:center">Meio da estadia</th><th style="text-align:center">Véspera do check-out</th>
-              <th style="text-align:center">Dia do check-out</th>
             </tr>
           </thead>
           <tbody id="linhas"></tbody>
@@ -251,7 +260,16 @@ details.notes b { color: var(--ink); }
 
     <details class="notes">
       <summary>Como os números são calculados</summary>
-      <ul>
+      <ul id="notes-av" hidden>
+        <li><b>O que conta como pedido:</b> o clique em "Solicitar feedback", tanto na tela Avaliações do Seazone Host quanto no card de check-out. Desde 21/10 os dois ficam registrados no mesmo lugar no Sapron, que guarda o dia e a hora do clique.</li>
+        <li><b>Quando um check-out conta:</b> a orientação dada às franquias é pedir a avaliação 5 dias depois do check-out. Por isso cada check-out entra no período pelo dia "check-out + 5" e só depois que esse dia passou. Conta como pedido se a reserva recebeu pedido, em qualquer data.</li>
+        <li><b>Plataforma:</b> a da reserva no Sapron. "Stays" são as reservas diretas lançadas na Stays.</li>
+        <li><b>Pedidos feitos no período:</b> o resumo mostra também os cliques pelo dia em que aconteceram, que é o retrato da atividade da franquia naquela semana.</li>
+        <li><b>Limite do dado:</b> cada reserva guarda só um pedido. Um segundo pedido ao mesmo hóspede não aparece. Até 21/10 o pedido feito pelo card de check-out não entrava, então o período antes disso pode estar subestimado para quem pede pelo card.</li>
+        <li><b>Últimos 7 dias, variação, janela móvel e régua:</b> iguais aos da aba de mensagens da estadia (usa = 50% ou mais dos check-outs com pedido; usa pouco = 10% a 49%; não usa = abaixo de 10%).</li>
+        <li><b>Fonte:</b> reservas do Sapron de imóveis de franquia, sem canceladas e sem bloqueios, desde 20/09/2026. Atualiza todo dia às 14h.</li>
+      </ul>
+      <ul id="notes-massa">
         <li><b>Fonte:</b> reservas do Sapron de imóveis de franquia, sem canceladas e sem bloqueios, desde 20/09/2026, quando o envio em massa foi liberado para as franquias. Atualiza todo dia às 14h.</li>
         <li><b>Quando cada mensagem conta:</b> as mesmas regras do Seazone Host. "2 dias antes" conta 2 dias antes do check-in; "dia do check-in" no próprio check-in; "meio da estadia" 2 dias depois do check-in, só em estadias de 4 noites ou mais; "véspera do check-out" um dia antes do check-out; "dia do check-out" no próprio dia.</li>
         <li><b>Só conta o que já podia ter sido enviado:</b> uma reserva entra numa etapa quando o dia dessa mensagem já passou (até ontem).</li>
@@ -266,10 +284,39 @@ details.notes b { color: var(--ink); }
 </div>
 
 <script>
-const ETAPAS = [
+const ETAPAS_MASSA = [
   ['d2', '2 dias antes', 'do check-in'], ['cin', 'Dia do check-in', ''], ['mid', 'Meio da estadia', 'estadias de 4+ noites'],
   ['eve', 'Véspera do check-out', ''], ['cout', 'Dia do check-out', '']
 ];
+const ETAPAS_AV = [
+  ['abnb', 'Airbnb', ''], ['bkg', 'Booking', ''], ['site', 'Site Seazone', ''], ['expd', 'Expedia e Decolar', ''], ['stays', 'Stays', 'reservas diretas']
+];
+// textos que mudam entre as duas seções
+const TXT = {
+  massa: {
+    pergunta: 'As franquias estão usando as mensagens em massa do Seazone Host?',
+    oque: '<b>O que esta aba mede:</b> as 5 mensagens da estadia enviadas pelos acordeões de mensagens em massa (2 dias antes, dia do check-in, meio da estadia, véspera e dia do check-out). O pedido de avaliação fica na outra aba.',
+    unid: 'mensagens', unidPoss: 'mensagens possíveis', obj: 'mensagens em massa',
+    hEtapas: 'Por etapa da hospedagem',
+    hintEtapas: 'Em quantas reservas cada mensagem foi enviada, de todas as que já podiam receber. A marca no meio é a régua de 50%.',
+    hintTab7: 'Cobertura = mensagens enviadas ÷ mensagens que a franquia podia ter enviado nos últimos 7 dias, somando as 5 etapas.',
+    hintTabT: 'Cobertura = mensagens enviadas ÷ mensagens que a franquia podia ter enviado desde 20/09, somando as 5 etapas.',
+    hintWk: 'Cada semana (domingo a sábado) comparada com a anterior. A última semana ainda está em andamento e tem menos mensagens possíveis: compare pela cobertura (%), não pelo total.',
+    altas: 'Maiores altas em mensagens enviadas', quedas: 'Maiores quedas em mensagens enviadas'
+  },
+  av: {
+    pergunta: 'As franquias estão pedindo avaliação aos hóspedes pelo Seazone Host?',
+    oque: '<b>O que esta aba mede:</b> os pedidos de avaliação feitos pelo botão "Solicitar feedback", na tela Avaliações ou no card de check-out. Cada check-out conta 5 dias depois da saída, que é quando a franquia deve pedir.',
+    unid: 'pedidos', unidPoss: 'check-outs que podiam receber pedido', obj: 'pedidos de avaliação',
+    hEtapas: 'Por plataforma',
+    hintEtapas: 'Quantos check-outs de cada plataforma receberam pedido, de todos que já estavam no prazo. A marca no meio é a régua de 50%.',
+    hintTab7: 'Cobertura = check-outs com pedido ÷ check-outs que já estavam no prazo de pedir nos últimos 7 dias (5 dias depois da saída).',
+    hintTabT: 'Cobertura = check-outs com pedido ÷ check-outs que já estavam no prazo de pedir desde 20/09 (5 dias depois da saída).',
+    hintWk: 'Cada semana (domingo a sábado) comparada com a anterior, pelo dia em que o pedido devia ser feito (check-out + 5). A última semana ainda está em andamento: compare pela cobertura (%), não pelo total.',
+    altas: 'Maiores altas em check-outs com pedido', quedas: 'Maiores quedas em check-outs com pedido'
+  }
+};
+let ETAPAS = ETAPAS_MASSA;
 const ROT = { usa: 'Usa', pouco: 'Usa pouco', nao: 'Não usa' };
 const pct = (s, e) => e ? s / e : 0;
 const statusDe = (e, s) => { const p = pct(s, e); return p >= 0.5 ? 'usa' : p >= 0.1 ? 'pouco' : 'nao'; };
@@ -297,6 +344,7 @@ function movimento(f) {
 }
 const ls = { get(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 
+let RAW = null, modo = ls.get('mem-modo', 'massa') === 'av' ? 'av' : 'massa';
 let P = null, periodo = ls.get('mem-periodo', 'r7'), filtro = ls.get('mem-filtro', 'todas'), ordem = ls.get('mem-ordem', 'cov'), busca = '';
 
 // Franquias do recorte escolhido: só quem tinha reserva elegível no período
@@ -304,7 +352,7 @@ function lista() {
   return (P.franquias || []).map(f => {
     const [e, s] = f.totais[periodo];
     const ant = periodo === 'r7' && f.totais.p7[0] ? f.totais.p7 : null;
-    return { fc: f.fc, nome: f.nome, eleg: e, env: s, status: statusDe(e, s), ant, etapas: f.etapas[periodo] };
+    return { fc: f.fc, nome: f.nome, eleg: e, env: s, status: statusDe(e, s), ant, etapas: f.etapas[periodo] || {} };
   }).filter(f => f.eleg > 0);
 }
 
@@ -316,7 +364,27 @@ function deltaHtml(atual, ant, unidade) {
   return `<span class="delta ${d > 0 ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'} ${txt} vs 7 dias anteriores</span>`;
 }
 
+function aplicaModo() {
+  const T = TXT[modo];
+  P = modo === 'av'
+    ? { gerado_em: RAW.gerado_em, inicio: RAW.inicio, janela: RAW.janela, franquias: RAW.avaliacoes.franquias, semanas: RAW.avaliacoes.semanas, cliques: RAW.avaliacoes.cliques }
+    : RAW;
+  ETAPAS = modo === 'av' ? ETAPAS_AV : ETAPAS_MASSA;
+  document.querySelectorAll('.abas button').forEach(b => b.setAttribute('aria-selected', String(b.dataset.m === modo)));
+  document.getElementById('pergunta').textContent = T.pergunta;
+  document.getElementById('oque').innerHTML = T.oque;
+  document.getElementById('h-etapas').textContent = T.hEtapas;
+  document.getElementById('hint-etapas').textContent = T.hintEtapas;
+  document.getElementById('hint-wk').textContent = T.hintWk;
+  document.getElementById('notes-av').hidden = modo !== 'av';
+  document.getElementById('notes-massa').hidden = modo === 'av';
+  const row = document.getElementById('th-row');
+  row.querySelectorAll('.th-e').forEach(th => th.remove());
+  ETAPAS.forEach(([, n]) => { const th = document.createElement('th'); th.className = 'th-e'; th.style.textAlign = 'center'; th.textContent = n; row.appendChild(th); });
+}
+
 function render() {
+  const T = TXT[modo];
   const F = lista();
   const r7 = periodo === 'r7';
   document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.p === periodo)));
@@ -324,9 +392,7 @@ function render() {
     ? `Últimos 7 dias: ${dBR(P.janela.inicio)} a ${dBR(P.janela.fim)}.`
     : `Desde a liberação: ${dBR(P.inicio)} a ${dBR(P.janela.fim)}.`;
   document.getElementById('th-comp').textContent = r7 ? '7 dias anteriores' : 'Última semana';
-  document.getElementById('hint-tab').textContent = r7
-    ? 'Cobertura = mensagens enviadas ÷ mensagens que a franquia podia ter enviado nos últimos 7 dias, somando as 5 etapas.'
-    : 'Cobertura = mensagens enviadas ÷ mensagens que a franquia podia ter enviado desde 20/09, somando as 5 etapas.';
+  document.getElementById('hint-tab').textContent = r7 ? T.hintTab7 : T.hintTabT;
 
   const nf = F.length, nu = F.filter(f => f.status === 'usa').length, np = F.filter(f => f.status === 'pouco').length;
   const na = F.filter(f => f.env > 0).length;
@@ -344,13 +410,13 @@ function render() {
   const quando = r7 ? 'nos últimos 7 dias' : 'desde 20/09';
   document.getElementById('kpis').innerHTML = `
     <div class="kpi hl"><span class="lab">Usam o envio</span><span class="num">${nu} <small>de ${nf}</small></span>
-      <span class="txt">${nu === 1 ? 'franquia enviou' : 'franquias enviaram'} pelo menos metade das mensagens possíveis ${quando}.</span>${deltaHtml(nu, ant?.usam)}</div>
+      <span class="txt">${nu === 1 ? 'franquia enviou' : 'franquias enviaram'} pelo menos metade ${modo === 'av' ? 'dos check-outs no prazo' : 'das mensagens possíveis'} ${quando}.</span>${deltaHtml(nu, ant?.usam)}</div>
     <div class="kpi"><span class="lab">Usam pouco</span><span class="num">${np}</span>
-      <span class="txt">${np === 1 ? 'franquia ficou' : 'franquias ficaram'} entre 10% e 49% das mensagens.</span>${deltaHtml(np, ant?.pouco)}</div>
+      <span class="txt">${np === 1 ? 'franquia ficou' : 'franquias ficaram'} entre 10% e 49% ${modo === 'av' ? 'dos check-outs' : 'das mensagens'}.</span>${deltaHtml(np, ant?.pouco)}</div>
     <div class="kpi"><span class="lab">Mandaram alguma</span><span class="num">${na} <small>de ${nf}</small></span>
-      <span class="txt">${nf - na} ${nf - na === 1 ? 'franquia não mandou' : 'franquias não mandaram'} nenhuma mensagem em massa ${quando}.</span>${deltaHtml(na, ant?.algum)}</div>
+      <span class="txt">${nf - na} ${nf - na === 1 ? 'franquia não mandou' : 'franquias não mandaram'} ${modo === 'av' ? 'nenhum pedido de avaliação' : 'nenhuma mensagem em massa'} ${quando}.</span>${deltaHtml(na, ant?.algum)}</div>
     <div class="kpi"><span class="lab">Cobertura geral</span><span class="num">${fmtP(pct(S, E))}</span>
-      <span class="txt">${fmtN(S)} mensagens enviadas de ${fmtN(E)} possíveis, somando todas as franquias.</span>${deltaHtml(pct(S, E), ant?.cov, 'pp')}</div>`;
+      <span class="txt">${modo === 'av' ? `${fmtN(S)} check-outs com pedido de ${fmtN(E)} no prazo` : `${fmtN(S)} mensagens enviadas de ${fmtN(E)} possíveis`}, somando todas as franquias.</span>${deltaHtml(pct(S, E), ant?.cov, 'pp')}</div>`;
 
   renderResumo();
   renderMov();
@@ -358,7 +424,7 @@ function render() {
   renderVarSemanas(P.semanas || []);
 
   const tot = {}, totA = {}; ETAPAS.forEach(([k]) => { tot[k] = [0, 0]; totA[k] = [0, 0]; });
-  F.forEach(f => ETAPAS.forEach(([k]) => { tot[k][0] += f.etapas[k][0]; tot[k][1] += f.etapas[k][1]; }));
+  F.forEach(f => ETAPAS.forEach(([k]) => { const x = f.etapas[k] || [0, 0]; tot[k][0] += x[0]; tot[k][1] += x[1]; }));
   const temAnt = r7 && (P.franquias || []).some(f => f.etapas.p7);
   if (temAnt) (P.franquias || []).forEach(f => ETAPAS.forEach(([k]) => { const x = f.etapas.p7?.[k] || [0, 0]; totA[k][0] += x[0]; totA[k][1] += x[1]; }));
   document.getElementById('etapas').innerHTML = ETAPAS.map(([k, n, sub]) => {
@@ -387,8 +453,17 @@ function renderResumo() {
   const verbo = d < -0.0005 ? 'caiu' : d > 0.0005 ? 'subiu' : 'ficou estável';
   const rel = Sa && dn ? ` (${dn > 0 ? '+' : '−'}${Math.abs(Math.round(dn / Sa * 100))}%)` : '';
   const nada = M.filter(m => m.sa === 0 && m.sb === 0).length;
-  el.innerHTML = `<p><b>O uso ${verbo}.</b> De ${dBR(P.janela.inicio)} a ${dBR(P.janela.fim)} as franquias enviaram <b>${fmtN(Sb)}</b> mensagens em massa, ${dn === 0 ? 'o mesmo número' : `<b>${fmtN(Math.abs(dn))} ${dn < 0 ? 'a menos' : 'a mais'}</b>`} que nos 7 dias anteriores${rel}. A cobertura geral foi de ${fmtP(pa)} para <b>${fmtP(pb)}</b> (${ppTxt(d)}).</p>
-    <p>${c('subiu')} ${c('subiu') === 1 ? 'franquia subiu' : 'franquias subiram'} de faixa, ${c('caiu')} ${c('caiu') === 1 ? 'caiu' : 'caíram'}, ${c('comecou')} ${c('comecou') === 1 ? 'começou' : 'começaram'} a mandar e ${c('parou')} ${c('parou') === 1 ? 'parou' : 'pararam'} de mandar. ${nada} ${nada === 1 ? 'segue' : 'seguem'} sem mandar nenhuma mensagem nos dois períodos.</p>`;
+  const difTxt = dn === 0 ? 'o mesmo número' : `<b>${fmtN(Math.abs(dn))} ${dn < 0 ? 'a menos' : 'a mais'}</b>`;
+  let linha1;
+  if (modo === 'av') {
+    const C = P.cliques || { r7: [0, 0], p7: [0, 0] }, dc = C.r7[0] - C.p7[0];
+    linha1 = `<p><b>O uso ${verbo}.</b> Dos check-outs que deviam receber pedido de ${dBR(P.janela.inicio)} a ${dBR(P.janela.fim)}, <b>${fmtN(Sb)}</b> receberam, ${difTxt} que nos 7 dias anteriores${rel}. A cobertura geral foi de ${fmtP(pa)} para <b>${fmtP(pb)}</b> (${ppTxt(d)}).</p>
+    <p>Pelo dia do clique, as franquias fizeram <b>${fmtN(C.r7[0])}</b> pedidos nos últimos 7 dias, ${dc === 0 ? 'o mesmo número' : `${fmtN(Math.abs(dc))} ${dc < 0 ? 'a menos' : 'a mais'}`} que nos 7 dias anteriores (${fmtN(C.p7[0])}). Pediram ${C.r7[1]} ${C.r7[1] === 1 ? 'franquia' : 'franquias'}, contra ${C.p7[1]} antes.</p>`;
+  } else {
+    linha1 = `<p><b>O uso ${verbo}.</b> De ${dBR(P.janela.inicio)} a ${dBR(P.janela.fim)} as franquias enviaram <b>${fmtN(Sb)}</b> mensagens em massa, ${difTxt} que nos 7 dias anteriores${rel}. A cobertura geral foi de ${fmtP(pa)} para <b>${fmtP(pb)}</b> (${ppTxt(d)}).</p>`;
+  }
+  el.innerHTML = `${linha1}
+    <p>${c('subiu')} ${c('subiu') === 1 ? 'franquia subiu' : 'franquias subiram'} de faixa, ${c('caiu')} ${c('caiu') === 1 ? 'caiu' : 'caíram'}, ${c('comecou')} ${c('comecou') === 1 ? 'começou' : 'começaram'} a mandar e ${c('parou')} ${c('parou') === 1 ? 'parou' : 'pararam'} de mandar. ${nada} ${nada === 1 ? 'segue' : 'seguem'} sem ${modo === 'av' ? 'pedir nenhuma avaliação' : 'mandar nenhuma mensagem'} nos dois períodos.</p>`;
 }
 
 function renderMov() {
@@ -409,7 +484,7 @@ function renderMov() {
       ${L.length ? `<div class="tbl"><table class="wk"><thead><tr><th>Franquia</th><th class="num-c">Enviadas</th><th class="num-c">Cobertura</th></tr></thead><tbody>${L.map(m => `<tr><td><span class="fc">${esc(m.fc)}</span><span class="nome">${esc(m.nome)}</span></td><td class="num-c">${m.sa} → <b>${m.sb}</b><br>${varHtml(m.dn, numVar)}</td><td class="num-c">${fmtP(m.pa)} → <b>${fmtP(m.pb)}</b><br>${varHtml(m.d, ppTxt)}</td></tr>`).join('')}</tbody></table></div>` : '<span class="vazio">Nenhuma franquia.</span>'}</div>`;
   const altas = M.filter(m => m.dn > 0).sort((a, b) => b.dn - a.dn).slice(0, 6);
   const quedas = M.filter(m => m.dn < 0).sort((a, b) => a.dn - b.dn).slice(0, 6);
-  document.getElementById('top2').innerHTML = top('Maiores altas em mensagens enviadas', altas) + top('Maiores quedas em mensagens enviadas', quedas);
+  document.getElementById('top2').innerHTML = top(TXT[modo].altas, altas) + top(TXT[modo].quedas, quedas);
 }
 
 function renderVarSemanas(S) {
@@ -475,7 +550,7 @@ function renderSemanas(S) {
   });
   document.getElementById('semanas').innerHTML =
     `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Franquias por faixa de uso, semana a semana desde 20/09">${g}</svg>
-     <p class="hint" style="margin:6px 0 0">O número sobre cada barra é quantas franquias mandaram pelo menos uma mensagem naquela semana.</p>`;
+     <p class="hint" style="margin:6px 0 0">O número sobre cada barra é quantas franquias ${modo === 'av' ? 'pediram pelo menos uma avaliação' : 'mandaram pelo menos uma mensagem'} naquela semana.</p>`;
 }
 
 function renderTabela() {
@@ -507,7 +582,7 @@ function renderTabela() {
   };
   L.sort(sorters[ordem] || sorters.cov);
   const tb = document.getElementById('linhas');
-  if (!L.length) { tb.innerHTML = `<tr><td colspan="11" class="empty">Nenhuma franquia com esse filtro.</td></tr>`; return; }
+  if (!L.length) { tb.innerHTML = `<tr><td colspan="${6 + ETAPAS.length}" class="empty">Nenhuma franquia com esse filtro.</td></tr>`; return; }
   tb.innerHTML = L.map(f => {
     const p = c(f), a = comp(f);
     let antTxt = '<span style="color:var(--muted)">sem reservas</span>', varTxt = '<span class="var eq">—</span>';
@@ -519,7 +594,7 @@ function renderTabela() {
       varTxt = varHtml(novo - velho, ppTxt);
     }
     const et = ETAPAS.map(([k]) => {
-      const [e, s] = f.etapas[k];
+      const [e, s] = f.etapas[k] || [0, 0];
       if (!e) return `<td class="et na">—</td>`;
       return `<td class="et${s ? '' : ' zero'}"><b>${s}</b>/${e}</td>`;
     }).join('');
@@ -531,6 +606,7 @@ function renderTabela() {
   }).join('');
 }
 
+document.querySelectorAll('.abas button').forEach(b => b.addEventListener('click', () => { modo = b.dataset.m; ls.set('mem-modo', modo); if (RAW) { aplicaModo(); render(); } }));
 document.querySelectorAll('.seg button').forEach(b => b.addEventListener('click', () => { periodo = b.dataset.p; ls.set('mem-periodo', periodo); if (P) render(); }));
 document.querySelectorAll('.chip').forEach(b => b.addEventListener('click', () => { filtro = b.dataset.f; ls.set('mem-filtro', filtro); if (P) renderTabela(); }));
 document.getElementById('busca').addEventListener('input', e => { busca = e.target.value; if (P) renderTabela(); });
@@ -539,7 +615,9 @@ document.getElementById('ordem').addEventListener('change', e => { ordem = e.tar
 fetch('dados.json?t=' + Date.now(), { cache: 'no-store' })
   .then(r => { if (!r.ok) throw new Error(r.status); return r.json(); })
   .then(dados => {
-    P = dados;
+    RAW = dados;
+    if (!RAW.avaliacoes) { modo = 'massa'; document.getElementById('m-av').hidden = true; }
+    aplicaModo();
     const ger = new Date(P.gerado_em);
     const horas = (Date.now() - ger.getTime()) / 36e5;
     const q = ger.toLocaleString('pt-BR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
