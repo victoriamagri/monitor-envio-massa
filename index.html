@@ -182,8 +182,8 @@ details.notes b { color: var(--ink); }
   </header>
 
   <div class="abas" role="tablist" aria-label="Seção do monitor">
-    <button type="button" role="tab" id="m-massa" data-m="massa" aria-selected="true">Mensagens da estadia</button>
-    <button type="button" role="tab" id="m-av" data-m="av" aria-selected="false">Pedidos de avaliação</button>
+    <button type="button" role="tab" id="m-av" data-m="av" aria-selected="true">Pedidos de avaliação</button>
+    <button type="button" role="tab" id="m-massa" data-m="massa" aria-selected="false">Mensagens da estadia</button>
   </div>
   <p class="oque" id="oque"></p>
 
@@ -344,7 +344,7 @@ function movimento(f) {
 }
 const ls = { get(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }, set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} } };
 
-let RAW = null, modo = ls.get('mem-modo', 'massa') === 'av' ? 'av' : 'massa';
+let RAW = null, modo = ls.get('mem-modo', 'av') === 'massa' ? 'massa' : 'av';
 let P = null, periodo = ls.get('mem-periodo', 'r7'), filtro = ls.get('mem-filtro', 'todas'), ordem = ls.get('mem-ordem', 'cov'), busca = '';
 
 // Franquias do recorte escolhido: só quem tinha reserva elegível no período
